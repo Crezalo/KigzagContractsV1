@@ -3,7 +3,7 @@ Smart contracts for core Xeldorado Factory and Router
 
 ## Licensing
 
-The primary license for Uniswap V3 Core is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE).
+The primary license for Xeldorado Contracts V1 is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE).
 
 ### Exceptions
 
