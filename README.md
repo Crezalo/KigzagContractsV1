@@ -1,13 +1,15 @@
-# XeldoradoContractsV1
-Smart contracts for core Xeldorado Factory and Router 
+# Basic Sample Hardhat Project
 
-## Licensing
+This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
 
-The primary license for Xeldorado Contracts V1 is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE).
+Try running some of the following tasks:
 
-### Exceptions
-
-- All files in `contracts/interfaces/` are licensed under `GPL-2.0-or-later` (as indicated in their SPDX headers), see [`contracts/interfaces/LICENSE`](./contracts/interfaces/LICENSE)
-- Several files in `contracts/libraries/` are licensed under `GPL-2.0-or-later` (as indicated in their SPDX headers), see [`contracts/libraries/LICENSE_GPL`](contracts/libraries/LICENSE_GPL)
-- `contracts/libraries/FullMath.sol` is licensed under `MIT` (as indicated in its SPDX header), see [`contracts/libraries/LICENSE_MIT`](contracts/libraries/LICENSE_MIT)
-- All files in `contracts/test` remain unlicensed.
+```shell
+npx hardhat accounts
+npx hardhat compile
+npx hardhat clean
+npx hardhat test
+npx hardhat node
+node scripts/sample-script.js
+npx hardhat help
+```
