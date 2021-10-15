@@ -1,5 +1,5 @@
 # XeldoradoContractsV1
-Smart contracts for core Xeldorado Factory and Router 
+Smart contracts for Xeldorado Protocol : Xeldorado Factory and Router 
 
 ## Licensing
 
