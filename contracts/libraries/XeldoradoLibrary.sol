@@ -35,7 +35,13 @@ library XeldoradoLibrary {
         require(reserveA > 0 && reserveB > 0, 'XeldoradoLibrary: INSUFFICIENT_LIQUIDITY');
         amountB = amountA.mul(reserveB) / reserveA;
     }
-
+    
+    function calculateFee(uint amount, uint fee) internal pure returns (uint) {
+        // fee percent in scale of 10000
+        return amount.mul(fee)/10000;
+    }
+    
+    // update 
     // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) internal pure returns (uint amountOut) {
         require(amountIn > 0, 'XeldoradoLibrary: INSUFFICIENT_INPUT_AMOUNT');
@@ -52,7 +58,7 @@ library XeldoradoLibrary {
         require(reserveIn > 0 && reserveOut > 0, 'XeldoradoLibrary: INSUFFICIENT_LIQUIDITY');
         uint numerator = reserveIn.mul(amountOut);
         uint denominator = reserveOut.sub(amountOut);
-        amountIn = (numerator / denominator).add(1);
+        amountIn = (numerator / denominator);
     }
 
     // performs chained getAmountOut calculations on any number of pairs

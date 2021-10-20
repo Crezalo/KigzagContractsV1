@@ -10,7 +10,7 @@ contract XeldoradoFactory is IXeldoradoFactory {
     address public override feeToSetter;
     uint public override fee;
     address public override xeldoradoCreatorFactory;
-    address private WETH;
+    address[] private BaseTokens;
 
     mapping(address => mapping(address => address)) public override getPair;
     address[] public override allPairs;
@@ -18,21 +18,34 @@ contract XeldoradoFactory is IXeldoradoFactory {
     XeldoradoCreatorFactory private xcf;
     // event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
-    constructor(address _feeToSetter, address _WETH) {
+    constructor(address _feeToSetter, address[] memory _BaseTokens) {
         feeToSetter = _feeToSetter;
         xcf = new XeldoradoCreatorFactory();
         xeldoradoCreatorFactory = address(xcf);
-        WETH = _WETH;
+        BaseTokens = _BaseTokens;
+    }
+
+    function addNewBaseToken(address btoken) public virtual override {
+        BaseTokens.push(btoken);
     }
 
     function allPairsLength() public virtual override view returns (uint) {
         return allPairs.length;
     }
+    
+    function _checkTokenExistsInBaseTokens(address btoken) internal view returns(bool){
+        for(uint i=0;i<BaseTokens.length;i++){
+            if(BaseTokens[i]==btoken){
+                return true;
+            }
+        }
+        return false;
+    }
 
     function createPair(address tokenA, address tokenB, address creator) public virtual override returns (address pairAddress) {
         require(tokenA != tokenB && tokenA != address(0) && tokenB != address(0), 'Xeldorado: address issue');
         require(getPair[tokenA][tokenB] == address(0), 'Xeldorado: PAIR_EXISTS'); // single check is sufficient
-        require((tokenA == WETH && tokenB == xcf.creatorToken(creator)) || (tokenB == WETH && tokenA == xcf.creatorToken(creator)), 'Xeldorado: either token not WETH or Creator Token not present');
+        require(tokenA == xcf.creatorToken(creator) && _checkTokenExistsInBaseTokens(tokenB) , 'Xeldorado: either token not WETH or Creator Token not present');
         
         XeldoradoPair pair = new XeldoradoPair();
         pair.initialize(tokenA, tokenB, creator, address(this), xeldoradoCreatorFactory);

@@ -10,6 +10,7 @@ interface IXeldoradoFactory {
     function fee() external view returns(uint);
     function xeldoradoCreatorFactory() external view returns (address);
 
+    function addNewBaseToken(address btoken) external;
     function getPair(address tokenA, address tokenB) external view returns (address pair);
     function allPairs(uint) external view returns (address pair);
     function allPairsLength() external view returns (uint);

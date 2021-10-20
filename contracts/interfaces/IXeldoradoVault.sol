@@ -6,6 +6,7 @@ interface IXeldoradoVault {
     event NFTRedeemed(address _nft, uint _tokenId);
     event liquidityFillStarted(address _token, address _basetoken, uint _minpriceofbasetoken);
     event liquidityFillEnded(address _pair);
+    event NFTReturned(address owner, uint vaultId);
     
     function admin() external view returns(address);
     function creator() external view returns(address);
@@ -23,9 +24,11 @@ interface IXeldoradoVault {
     function initialize(address _token) external;
     function addMintedNFTERC(address _nft, uint _tokenId) external;
     function addNFTByCreateNewCollection(string memory _tokenURI) external;
-    function singleNFTPrice() external returns(uint);
+    function singleNFTPrice() external view returns(uint);
+    function singleNFTReturnPrice() external view returns(uint);
     function redeemNFT(address _to, uint _vaultId) external;
-    function initializeLiquidityOffering(address _basetoken, uint _minpriceofbasetoken, address _pair) external ;
+    function ReturnOfRedeemedNFT(address _to, uint _vaultId) external;
+    function initializeLiquidityOffering(address _basetoken, uint _minpriceofbasetoken, address _pair, uint _days) external ;
     function endLiquidityFilling() external;
     function bidCreatorToken(address _buyer, uint _amount, uint _bidpriceofbasetoken, uint _xfee, uint _cfee, address _feeTo) external returns(bool success);
     function viewLiquidityFiling() external returns (uint percent);

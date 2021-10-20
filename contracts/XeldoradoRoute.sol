@@ -7,16 +7,17 @@ import './interfaces/IXeldoradoVault.sol';
 import './interfaces/IXeldoradoPair.sol';
 import './interfaces/IERC20X.sol';
 import './interfaces/IERC721.sol';
-import './interfaces/IWETH.sol';
+// import './interfaces/IBaseTokens.sol';
 import './libraries/XeldoradoLibrary.sol';
 import './libraries/SafeMath.sol';
+import './libraries/XeldoradoSafeTransactionHelper.sol';
 
 contract XeldoradoRoute {
     using SafeMath for uint;
 
     address public immutable factory;
     address public immutable xeldoradocreatorfactory;
-    address public immutable WETH;
+    address[] public BaseTokens;
     address public admin;
 
     modifier ensure(uint deadline) {
@@ -24,15 +25,29 @@ contract XeldoradoRoute {
         _;
     }
 
-    constructor(address _factory, address _WETH) {
+    constructor(address _factory, address[] memory _BaseTokens) {
         factory = _factory;
         xeldoradocreatorfactory = IXeldoradoFactory(_factory).xeldoradoCreatorFactory();
-        WETH = _WETH;
+        BaseTokens = _BaseTokens;
+    }
+    
+    function _checkTokenExistsInBaseTokens(address btoken) internal view returns(bool){
+        for(uint i=0;i<BaseTokens.length;i++){
+            if(BaseTokens[i]==btoken){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    function addNewBaseToken(address btoken) public {
+        IXeldoradoFactory(factory).addNewBaseToken(btoken);
+        BaseTokens.push(btoken);
     }
 
-    receive() external payable {
-        assert(msg.sender == WETH); // only accept ETH via fallback from the WETH contract
-    }
+    // receive() external payable {
+    //     assert(msg.sender == BaseTokens); // only accept ETH via fallback from the BaseTokens contract
+    // }
 
     
     //////////////////////////////////
@@ -153,9 +168,12 @@ contract XeldoradoRoute {
         return IXeldoradoVault(vault).initialBalance();
     }
     
+    // function approve(address _contract, address _to, uint amount_or_tokenid) public {
+    //     TransferHelper.safeApprove(_contract, _to, amount_or_tokenid);
+    // }
+    
     function addMintedNFTERC(address _nft, uint _tokenId, address vault) public{
         require(msg.sender == vaultCreator(vault), 'Xeldorado: only creator can add new NFTs');
-        IERC721(_nft).approve(vault, _tokenId);
         IXeldoradoVault(vault).addMintedNFTERC(_nft,_tokenId);
     }
     
@@ -164,37 +182,115 @@ contract XeldoradoRoute {
         IXeldoradoVault(vault).addNFTByCreateNewCollection(_tokenURI);
     }
     
-    function singleNFTPrice(address vault) public returns(uint){
+    function singleNFTPrice(address vault) public view returns(uint){
         return IXeldoradoVault(vault).singleNFTPrice();
     }
-    
-    function redeemNFT(address _to, uint _vaultId, address vault) public{
-        require(IERC20X(vaultToken(vault)).approve(vault, singleNFTPrice(vault)), 'Xeldorado: need token approval');
-        IXeldoradoVault(vault).redeemNFT(_to, _vaultId);
-        IERC20X(vaultToken(vault)).approve(vault, 0);
+    function singleNFTReturnPrice(address vault) public view returns(uint){
+        return IXeldoradoVault(vault).singleNFTReturnPrice();
     }
     
-    function initializeLiquidityOffering(address _basetoken, uint _minpriceofbasetoken, address vault) public {
-        require(msg.sender == vaultCreator(vault), 'Xeldorado: only creator can add new NFTs');
-        IXeldoradoVault(vault).initializeLiquidityOffering(_basetoken, _minpriceofbasetoken, createPair(creatorToken(vault), WETH));
+    function redeemNFT(uint _vaultId, address vault) public{
+        // TransferHelper.safeApprove(vaultToken(vault), vault, singleNFTPrice(vault));
+        IXeldoradoVault(vault).redeemNFT(msg.sender, _vaultId);
     }
     
-    function bidCreatorToken(address _buyer, uint _amount, uint _bidpriceofbasetoken, address vault) public returns(bool success){
-        require(IERC20X(vaultBasetoken(vault)).approve(vault, _amount.mul(_bidpriceofbasetoken).mul(1000).add(fee().mul(10).add(creatorFee(vaultCreator(vault))) / 10) / (10**21)), 'Xeldorado: need approval');
-        success = IXeldoradoVault(vault).bidCreatorToken(_buyer, _amount, _bidpriceofbasetoken, fee(), creatorFee(vaultCreator(vault)),feeTo());
-        require(IERC20X(vaultBasetoken(vault)).approve(vault, 0), 'Xeldorado: need approval');
+    function ReturnOfRedeemedNFT(uint _vaultId, address vault) public {
+        require(msg.sender == IERC721(vaultIdTonftContract(_vaultId,vault)).ownerOf(vaultIdToTokenId(_vaultId,vault)), 'Xeldorado: only NFT owner can return');
+        // TransferHelper.safeApprove(vaultIdTonftContract(_vaultId,vault),vault,vaultIdToTokenId(_vaultId,vault));
+        IXeldoradoVault(vault).ReturnOfRedeemedNFT(msg.sender, _vaultId);
+    }
+    
+    function initializeLiquidityOffering(address _basetoken, uint _minpriceofbasetoken, uint _days, address vault) public {
+        require(msg.sender == vaultCreator(vault), 'Xeldorado: only creator can initialize liquidity offering');
+        require(_checkTokenExistsInBaseTokens(_basetoken), 'Xeldorado: must be one of the accepted base tokens');
+        IXeldoradoVault(vault).initializeLiquidityOffering(_basetoken, _minpriceofbasetoken, createPair(vaultToken(vault), _basetoken), _days);
+    }
+    
+    function bidCreatorToken(uint _amount, uint _bidpriceofbasetoken, address vault) public returns(bool success){
+        // uint totalFees = XeldoradoLibrary.calculateFee(_amount.mul(_bidpriceofbasetoken)/10**18, fee().mul(10)).add(XeldoradoLibrary.calculateFee(_amount.mul(_bidpriceofbasetoken)/10**18, creatorFee(vaultCreator(vault))));
+        // TransferHelper.safeApprove(vaultBasetoken(vault), vault, (_amount.mul(_bidpriceofbasetoken) / (10**18)).add(totalFees));
+        success = IXeldoradoVault(vault).bidCreatorToken(msg.sender, _amount, _bidpriceofbasetoken, fee(), creatorFee(vaultCreator(vault)),feeTo());
+        // TransferHelper.safeApprove(vaultBasetoken(vault), vault, 0);
     }
     
     function endLiquidityFilling(address vault) public {
-        require(msg.sender == vaultCreator(vault), 'Xeldorado: only creator can add new NFTs');
+        require(msg.sender == vaultCreator(vault), 'Xeldorado: only creator can end Liquidity offering');
         IXeldoradoVault(vault).endLiquidityFilling();
     }
+    
     function viewLiquidityFiling(address vault) public returns (uint percent){
-        require(msg.sender == vaultCreator(vault), 'Xeldorado: only creator can add new NFTs');
+        require(msg.sender == vaultCreator(vault), 'Xeldorado: only creator can view Liquidity offering status');
         percent = IXeldoradoVault(vault).viewLiquidityFiling(); // scale of 1000
     }
     
     ///////////////////////////////////////
     // ***** Creator Pair functions**** //
     /////////////////////////////////////
+    
+    function pairMINIMUM_LIQUIDITY(address pair) public pure returns (uint){
+        return IXeldoradoPair(pair).MINIMUM_LIQUIDITY();
+    }
+    
+    function pairAdmin(address pair) public view returns (address){
+        return IXeldoradoPair(pair).admin();
+        
+    }
+    
+    function pairToken0(address pair) public view returns (address){
+        return IXeldoradoPair(pair).token0();
+    }
+    
+    function pairToken1(address pair) public view returns (address){
+        return IXeldoradoPair(pair).token1();
+        
+    }
+    
+    function pairGetReserves(address pair) public view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast){
+        return IXeldoradoPair(pair).getReserves();
+        
+    }
+    
+    function pairPrice0CumulativeLast(address pair) public view returns (uint){
+        return IXeldoradoPair(pair).price0CumulativeLast();
+    }
+    
+    function pairPrice1CumulativeLast(address pair) public view returns (uint){
+        return IXeldoradoPair(pair).price1CumulativeLast();
+        
+    }
+    
+    function pairCreator(address pair) public view returns (address){
+        return IXeldoradoPair(pair).creator();
+    }
+    
+    function pairLiquidityAdded(address pair) public{
+       IXeldoradoPair(pair).LiquidityAdded();
+    }
+    
+    function pairMinimumCreatorBalance(address pair) public view returns (uint){
+        return IXeldoradoPair(pair).minimumCreatorBalance();
+    }
+    
+    function pairSwap(address tokenIn, uint amountIn, address tokenOut, uint amountOut, address pair) public payable {
+        if (tokenIn == pairToken1(pair)){
+            // TransferHelper.safeApprove(tokenIn, pair, amountIn.add(XeldoradoLibrary.calculateFee(amountIn, fee().mul(10)).add(XeldoradoLibrary.calculateFee(amountIn, creatorFee(pairCreator(pair))))));
+            IXeldoradoPair(pair).swap(tokenIn, amountIn, tokenOut, amountOut, msg.sender);
+            // TransferHelper.safeApprove(tokenIn, pair, 0);
+        }
+        else if(tokenOut== pairToken1(pair)){
+            // TransferHelper.safeApprove(tokenIn, pair, amountIn);
+            // TransferHelper.safeApprove(tokenOut, pair, XeldoradoLibrary.calculateFee(amountOut, fee().mul(10)).add(XeldoradoLibrary.calculateFee(amountOut, creatorFee(pairCreator(pair)))));
+            IXeldoradoPair(pair).swap(tokenIn, amountIn, tokenOut, amountOut, msg.sender);
+            // TransferHelper.safeApprove(tokenIn, pair, 0);
+        }
+        else {
+            require(1==0,"Xeldorado: Shouldn't reach here none of the token is base token");
+        }
+        
+    }
+    
+    function pairSync(address pair) public{
+        IXeldoradoPair(pair).sync();
+    }
+
 }

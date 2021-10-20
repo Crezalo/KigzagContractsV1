@@ -5,6 +5,7 @@ interface IXeldoradoPair {
 
     event Swap(address indexed sender, uint amountIn, address tokenIn, uint amountOut, address tokenOut, address indexed to);
     event Sync(uint112 reserve0, uint112 reserve1);
+    event CreatorVestingViolated(uint amountSold);
 
     function MINIMUM_LIQUIDITY() external pure returns (uint);
     function admin() external view returns (address);
@@ -16,12 +17,13 @@ interface IXeldoradoPair {
     // function kLast() external view returns (uint);
     function creator() external view returns (address);
     function factory() external view returns (address);
+    
     function creatorfactory() external view returns (address);
-
-    function approveTransfer(address _token, uint _amount) external;
-    function LquidityAdded() external;
+    function LiquidityAdded() external;
+    
+    function minimumCreatorBalance() external view returns(uint);
     function swap(address tokenIn, uint amountIn, address tokenOut, uint amountOut, address to) external;
-    function skim(address to) external;
+    // function skim(address to) external;
     function sync() external;
 
     function initialize(address _token0, address _token1, address _creator, address _factory, address _creatorfactory) external;

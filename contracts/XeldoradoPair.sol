@@ -20,7 +20,7 @@ contract XeldoradoPair is IXeldoradoPair {
 
     address public override admin;
     address public override token0; // Creator Token
-    address public override token1; // WETH
+    address public override token1; // Base Tokens
 
     uint112 private reserve0;           // uses single storage slot, accessible via getReserves
     uint112 private reserve1;           // uses single storage slot, accessible via getReserves
@@ -33,8 +33,10 @@ contract XeldoradoPair is IXeldoradoPair {
     address public override creator;
     address public override factory;
     address public override creatorfactory;
-
+    
+    uint private startTimeStamp;
     uint private unlocked = 1;
+    uint private initialCreatorBalance;
     modifier lock() {
         require(unlocked == 1, 'Xeldorado: LOCKED');
         unlocked = 0;
@@ -64,7 +66,7 @@ contract XeldoradoPair is IXeldoradoPair {
     // event Sync(uint112 reserve0, uint112 reserve1);
 
     constructor() {
-        admin = msg.sender;
+        admin = msg.sender;// xeldorado factory
     }
 
     // called once by the admin at time of deployment
@@ -75,9 +77,12 @@ contract XeldoradoPair is IXeldoradoPair {
         creator = _creator;
         factory = _factory;
         creatorfactory = _creatorfactory;
+        
+        startTimeStamp = block.timestamp;
+        initialCreatorBalance = IERC20X(token0).balanceOf(creator);
     }
     
-    function LquidityAdded() public virtual override {
+    function LiquidityAdded() public virtual override {
         reserve0 = uint112(IERC20X(token0).balanceOf(address(this)));
         reserve1 = uint112(IERC20X(token1).balanceOf(address(this)));
     }
@@ -98,99 +103,97 @@ contract XeldoradoPair is IXeldoradoPair {
         emit Sync(reserve0, reserve1);
     }
     
-    function approveTransfer(address _token, uint _amount) public virtual override {
-        IERC20X(_token).approve(address(this),_amount);
+    // sub 2% of total amount times number of months passed bsically 2377.76 tokens can be sold by creator in one month
+    function minimumCreatorBalance() public virtual override view returns(uint){
+        return initialCreatorBalance.sub((block.timestamp.sub(startTimeStamp)).mul(237776 * 10 ** 16) / (24 * 60 * 60 * 30 ));
     }
     
-
-    // add approve function in router for transfer of amountIn + xfee + cfee 
     // this low-level function should be called from a contract which performs important safety checks
     function swap(address tokenIn, uint amountIn, address tokenOut, uint amountOut, address to) public virtual override lock {
         require((tokenIn==token0 && tokenOut==token1) || (tokenIn==token1 && tokenOut==token0), 'Xeldorado: one or both tokens dont match the pair');
         require(amountIn > 0 && amountOut > 0, 'Xeldorado: INSUFFICIENT_OUTPUT_AMOUNT');
-        (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
-
-        uint balance0;
-        uint balance1;
-        bool success;
-        
-        if (tokenIn == token0){
-            require(amountOut < _reserve1, 'Xeldorado: INSUFFICIENT_LIQUIDITY');
-            if(XeldoradoLibrary.getAmountOut(amountIn,_reserve0,reserve1) >= amountOut) amountOut = XeldoradoLibrary.getAmountOut(amountIn,_reserve0,reserve1);
-            else require(0>1, 'Xeldorado:cannot swap for mentioned amount out');
+        if(IERC20X(token0).balanceOf(creator)>=minimumCreatorBalance()) // ensure vesting period is nrespected by creator
+        {
+            (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
+    
+            uint balance0;
+            uint balance1;
+            bool success;
             
-            // bool success = IERC20X(token0).approve(address(this),amountIn);
-            // require(success,'Xeldorado: need approval');
+            if (tokenIn == token0){
+                require(amountOut < _reserve1, 'Xeldorado: INSUFFICIENT_LIQUIDITY');
+                if(XeldoradoLibrary.getAmountOut(amountIn,_reserve0,reserve1) >= amountOut) amountOut = XeldoradoLibrary.getAmountOut(amountIn,_reserve0,reserve1);
+                else require(0>1, 'Xeldorado:cannot swap for mentioned amount out');
+                
+                require(to != token0 && to != token1, 'Xeldorado: INVALID_TO');
+                
+                
+                //take approval from to
+                success = IERC20X(token0).transferFrom(to, address(this), amountIn);
+                require(success,'Xeldorado: amount In transfer failed');
+                success = IERC20X(token1).transfer(to,amountOut); 
+                require(success, 'Xeldorado: amount Out transfer failed');
             
-            require(to != token0 && to != token1, 'Xeldorado: INVALID_TO');
+                // take approval from to for transfer
+                // charge exchange fee
+                success = IERC20X(token1).transferFrom(to, IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary.calculateFee(amountOut, IXeldoradoFactory(factory).fee().mul(10)));
+                require(success,'Xeldorado: exchange fee transfer failed');
+                // charge creator royalty fee
+                success = IERC20X(token1).transferFrom(to, creator, XeldoradoLibrary.calculateFee(amountOut, IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator)));
+                require(success,'Xeldorado: creator fee transfer failed');
+                
+                balance0 = IERC20X(token0).balanceOf(address(this));
+                balance1 = IERC20X(token1).balanceOf(address(this));
             
+                // require(balance0.mul(1000).sub(amountIn.mul(3)).mul(balance1.mul(1000)) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'Xeldorado: K');
+            }
+            else {
+                require(amountOut < _reserve0, 'Xeldorado: INSUFFICIENT_LIQUIDITY');
+                if(XeldoradoLibrary.getAmountOut(amountIn,_reserve1,reserve0) >= amountOut) amountOut = XeldoradoLibrary.getAmountOut(amountIn,_reserve1,reserve0);
+                else require(0>1, 'Xeldorado:cannot swap for mentioned amount out');
+                
+                
+                require(to != token0 && to != token1, 'Xeldorado: INVALID_TO');
             
-            //take approval from to
-            success = IERC20X(token0).transfer(address(this), amountIn);
-            require(success,'Xeldorado: amount In transfer failed');
-            success = IERC20X(token1).transfer(to,amountOut); 
-            require(success, 'Xeldorado: amount Out transfer failed');
+                //take approval from to
+                success = IERC20X(token1).transferFrom(to, address(this),amountIn);
+                require(success,'Xeldorado: amount In transfer failed');
+                success = IERC20X(token0).transfer(to,amountOut); 
+                require(success, 'Xeldorado: amount Out transfer failed');
+                
+                
+                // take approval from to for transfer
+                // charge exchange fee
+                success = IERC20X(token1).transferFrom(to, IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary.calculateFee(amountIn, IXeldoradoFactory(factory).fee().mul(10)));
+                require(success,'Xeldorado: exchange fee transfer failed');
+                // charge creator royalty fee
+                success = IERC20X(token1).transferFrom(to, creator, XeldoradoLibrary.calculateFee(amountIn, IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator)));
+                require(success,'Xeldorado: creator fee transfer failed');
+                
+                balance0 = IERC20X(token0).balanceOf(address(this));
+                balance1 = IERC20X(token1).balanceOf(address(this));
+                
+                // balance0Adjusted = balance0.mul(1000);
+                // balance1Adjusted = balance1.mul(1000).sub(amountIn.mul(3));
+                // require(balance0.mul(1000).mul(balance1.mul(1000).sub(amountIn.mul(3))) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'Xeldorado: K');
+            }
             
-            
-            // take approval from to for transfer
-            // charge exchange fee
-            success = IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), IXeldoradoFactory(factory).fee());
-            require(success,'Xeldorado: exchange fee transfer failed');
-            // charge creator royalty fee
-            success = IERC20X(token1).transfer(creator, IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator));
-            require(success,'Xeldorado: creator fee transfer failed');
-            
-            balance0 = IERC20X(token0).balanceOf(address(this));
-            balance1 = IERC20X(token1).balanceOf(address(this));
-        
-            // balance0Adjusted = balance0.mul(1000).sub(amountIn.mul(3));
-            // balance1Adjusted = balance1.mul(1000);
-            require(balance0.mul(1000).sub(amountIn.mul(3)).mul(balance1.mul(1000)) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'Xeldorado: K');
-        }
-        else {
-            require(amountOut < _reserve0, 'Xeldorado: INSUFFICIENT_LIQUIDITY');
-            if(XeldoradoLibrary.getAmountOut(amountIn,_reserve1,reserve0) >= amountOut) amountOut = XeldoradoLibrary.getAmountOut(amountIn,_reserve0,reserve1);
-            else require(0>1, 'Xeldorado:cannot swap for mentioned amount out');
-            
-            // bool success = IERC20X(token1).approve(address(this),amountIn);
-            // require(success,'Xeldorado: need approval');
-            
-            require(to != token0 && to != token1, 'Xeldorado: INVALID_TO');
-        
-            //take approval from to
-            success = IERC20X(token1).transfer(address(this),amountIn);
-            require(success,'Xeldorado: amount In transfer failed');
-            success = IERC20X(token0).transfer(to,amountOut); 
-            require(success, 'Xeldorado: amount Out transfer failed');
-            
-            
-            // take approval from to for transfer
-            // charge exchange fee
-            success = IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), IXeldoradoFactory(factory).fee());
-            require(success,'Xeldorado: exchange fee transfer failed');
-            // charge creator royalty fee
-            success = IERC20X(token1).transfer(creator, IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator));
-            require(success,'Xeldorado: creator fee transfer failed');
-            
-            balance0 = IERC20X(token0).balanceOf(address(this));
-            balance1 = IERC20X(token1).balanceOf(address(this));
-            
-            // balance0Adjusted = balance0.mul(1000);
-            // balance1Adjusted = balance1.mul(1000).sub(amountIn.mul(3));
-            require(balance0.mul(1000).mul(balance1.mul(1000).sub(amountIn.mul(3))) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'Xeldorado: K');
+            _update(balance0, balance1, _reserve0, _reserve1);
+            emit Swap(msg.sender, amountIn, tokenIn, amountOut, tokenOut, to);
         }
         
-        _update(balance0, balance1, _reserve0, _reserve1);
-        emit Swap(msg.sender, amountIn, tokenIn, amountOut, tokenOut, to);
+        else{
+            emit CreatorVestingViolated(IERC20X(token0).balanceOf(creator).sub(minimumCreatorBalance()));
+        }
     }
 
     // force balances to match reserves
-    function skim(address to) public virtual override lock {
-        address _token0 = token0; // gas savings
-        address _token1 = token1; // gas savings
-        _safeTransfer(_token0, to, IERC20X(_token0).balanceOf(address(this)).sub(reserve0));
-        _safeTransfer(_token1, to, IERC20X(_token1).balanceOf(address(this)).sub(reserve1));
-    }
+    // function skim(address to) public virtual override lock {
+    //     address _token0 = token0; // gas savings
+    //     address _token1 = token1; // gas savings
+    //     _safeTransfer(_token0, to, IERC20X(_token0).balanceOf(address(this)).sub(reserve0));
+    //     _safeTransfer(_token1, to, IERC20X(_token1).balanceOf(address(this)).sub(reserve1));
+    // }
 
     // force reserves to match balances
     function sync() public virtual override lock {

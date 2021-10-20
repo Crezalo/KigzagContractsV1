@@ -17,7 +17,7 @@ contract XeldoradoCreatorFactory is IXeldoradoCreatorFactory{
     }
     
     function newCreator(address _creator, uint _creatorFee) public virtual override {
-        require(_creatorFee <= 5, 'Xeldorado: creator cannot charge more than 0.05%');
+        require(_creatorFee <= 5, 'Xeldorado: creator cannot charge more than 0.05%'); // scale of 10000
         allCreators.push(_creator);
         creatorFee[_creator] = _creatorFee;
     }
