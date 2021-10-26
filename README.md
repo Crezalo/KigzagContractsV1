@@ -5,6 +5,8 @@ Open source implementation of Xeldorado Protocol - The NFT DEX. It contains smar
 
 What we do: [Understand](https://nft.xeldorado.live/index.html#xeldoradoprotocol)
 
+<!-- <a href="https://nft.xeldorado.live/index.html#xeldoradoprotocol" target="_blank"><img src="https://nft.xeldorado.live/images/logo.png" width="150" height="30"/></a> -->
+
 White paper for Xeldorado Protocol is currently under development.
 
 ## Community
