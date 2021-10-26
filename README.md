@@ -1,5 +1,18 @@
 # [Xeldorado Protocol](nft.xeldorado.live)
-Open source implementation of Xeldorado Protocol - TheNFT DEX. It contains smart contracts for Xeldorado Protocol : Xeldorado Factory and Route.
+Open source implementation of Xeldorado Protocol - The NFT DEX. It contains smart contracts for Xeldorado Protocol : Xeldorado Factory and Route.
+
+## Documentation
+
+What we do: [Understand](https://nft.xeldorado.live/index.html#xeldoradoprotocol)
+
+White paper for Xeldorado Protocol is currently under development.
+
+## Community
+
+<a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://nft.xeldorado.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://t.me/xeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://twitter.com/RealXeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://www.reddit.com/r/Xeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/reddit.png" width="80" height="80"/></a>
 
 ## Licensing
 
