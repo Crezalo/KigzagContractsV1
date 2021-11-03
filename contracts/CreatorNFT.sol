@@ -10,7 +10,7 @@ contract CreatorNFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     address public creator;
-
+    
     constructor(address _creator, string memory _name, string memory _symbol) ERC721(_name, _symbol){
         creator = _creator;
     }   
@@ -22,5 +22,14 @@ contract CreatorNFT is ERC721URIStorage {
         _mint(_vault, newItemId);
         _setTokenURI(newItemId,tokenURI);
         return newItemId;
+    }
+    
+    function createBatchToken(string[] memory tokenURI, address _vault) public returns (uint[] memory newItemId){
+        for(uint i=0;i<tokenURI.length;i++){
+            _tokenIds.increment();
+            newItemId[i] = _tokenIds.current();
+            _mint(_vault, newItemId[i]);
+            _setTokenURI(newItemId[i],tokenURI[i]);
+        }
     }
 }

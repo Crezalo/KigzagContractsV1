@@ -1,4 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
+require('hardhat-contract-sizer');
 require('dotenv').config();
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
@@ -43,6 +44,12 @@ module.exports = {
       }
     }
   },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+  },
   paths: {
     sources: "./contracts",
     tests: "./test",
@@ -50,6 +57,6 @@ module.exports = {
     artifacts: "./artifacts"
   },
   mocha: {
-    timeout: 20000
+    timeout: 1
   }
 };

@@ -9,6 +9,10 @@ contract XeldoradoFactory is IXeldoradoFactory {
     address public override feeTo;
     address public override feeToSetter;
     uint public override fee;
+    uint public override discount;
+    uint public override noOFTokensForDiscount;
+    address public override exchangeToken;
+    address public override migrationApprover;
     address public override xeldoradoCreatorFactory;
     address[] private BaseTokens;
 
@@ -56,20 +60,41 @@ contract XeldoradoFactory is IXeldoradoFactory {
         emit PairCreated(tokenA, tokenB, address(pair), allPairs.length);
     }
 
-
-    function setFeeTo(address _feeTo) public virtual override {
+    //// Admin functions // Use web3 and interface for below functions
+    function setFeeTo(address _feeTo) public {
         require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
         feeTo = _feeTo;
     }
 
-    function setFeeToSetter(address _feeToSetter) public virtual override {
+    function setFeeToSetter(address _feeToSetter) public {
         require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
         feeToSetter = _feeToSetter;
     }
     
-    function setFee(uint _fee) public virtual override {
+    function setFee(uint _fee) public {
         require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
         fee = _fee;
         // set to 5 (i.e. 0.5% on the scale of 1000)
+    }
+    
+    function setDiscount(uint _discount) public {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        discount = _discount;
+        // set to 2 (i.e. 0.2% on the scale of 1000) so actual fee = 0.5%-0.2%
+    }
+    
+    function setNoOFTokensForDiscount(uint _noOFTokensForDiscount) public {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        noOFTokensForDiscount = _noOFTokensForDiscount;
+    }
+    
+    function setExchangeToken(address _exchangeToken) public {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        exchangeToken = _exchangeToken;
+    }
+    
+    function migrationApproval(address _migrationApprover) public {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        migrationApprover = _migrationApprover;
     }
 }

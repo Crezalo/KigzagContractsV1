@@ -3,8 +3,12 @@ pragma solidity ^0.8.4;
 
 import '../interfaces/IXeldoradoPair.sol';
 import '../interfaces/IXeldoradoFactory.sol';
+import '../interfaces/IERC20X.sol';
 
 import "./SafeMath.sol";
+
+import '../XeldoradoVault.sol';
+import '../CreatorVestingVault.sol';
 
 library XeldoradoLibrary {
     using SafeMath for uint;
@@ -34,11 +38,6 @@ library XeldoradoLibrary {
         require(amountA > 0, 'XeldoradoLibrary: INSUFFICIENT_AMOUNT');
         require(reserveA > 0 && reserveB > 0, 'XeldoradoLibrary: INSUFFICIENT_LIQUIDITY');
         amountB = amountA.mul(reserveB) / reserveA;
-    }
-    
-    function calculateFee(uint amount, uint fee) internal pure returns (uint) {
-        // fee percent in scale of 10000
-        return amount.mul(fee)/10000;
     }
     
     // update 

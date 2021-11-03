@@ -9,8 +9,8 @@ contract CreatorToken is ERC20, ICreatorToken {
     address private admin;
     address private vault;
 
-    constructor(string memory name, string memory symbol, address creator, address _vault) ERC20(name,symbol){
-        _mint(creator,26685312 * 10 ** 16);
+    constructor(string memory name, string memory symbol, address _creatorVestingVault, address _vault) ERC20(name,symbol){
+        _mint(_creatorVestingVault, 26685312 * 10 ** 16);
         _mint(_vault,84503488 * 10 ** 16);
         admin == msg.sender;
         vault = _vault;

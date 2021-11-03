@@ -8,12 +8,13 @@ interface IXeldoradoCreatorFactory {
     
     function creatorToken(address _creator) external view returns(address);
     function creatorVault(address _creator) external view returns(address);
+    function creatorVestingVault(address _creator) external view returns(address);
     function creatorFee(address _creator) external view returns(uint);
     function allCreators(uint) external view returns(address);
-    function factory() external view returns(address);
+    // function factory() external view returns(address);
     function creatorExist(address _creator) external view returns(bool);
     
     function newCreator(address _creator, uint _creatorFee) external;
     function updateCreatorFee(address _creator, uint _creatorFee) external;
-    function generateCreatorVault(address _creator, string memory _name, string memory _symbol) external returns(address vault, address token);
+    function generateCreatorVault(address _creator, string memory _name, string memory _symbol, address cvault) external returns(address token);
 }

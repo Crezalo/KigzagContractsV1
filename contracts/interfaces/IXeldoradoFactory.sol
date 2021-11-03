@@ -8,6 +8,10 @@ interface IXeldoradoFactory {
     function feeTo() external view returns (address);
     function feeToSetter() external view returns (address);
     function fee() external view returns(uint);
+    function discount() external view returns(uint);
+    function noOFTokensForDiscount() external view returns(uint);
+    function exchangeToken() external view returns(address);
+    function migrationApprover() external view returns(address);
     function xeldoradoCreatorFactory() external view returns (address);
 
     function addNewBaseToken(address btoken) external;
@@ -17,7 +21,11 @@ interface IXeldoradoFactory {
 
     function createPair(address tokenA, address tokenB, address creator) external returns (address pairAddress);
 
-    function setFeeTo(address) external;
-    function setFeeToSetter(address) external;
-    function setFee(uint _fee) external;
+    // function setFeeTo(address) external;
+    // function setFeeToSetter(address) external;
+    // function setFee(uint _fee) external;
+    // function setDiscount(uint _discount) external;
+    // function setNoOFTokensForDiscount(uint _noOFTokensForDiscount) external;
+    // function setExchangeToken(address _exchangeToken) external;
+    // function migrationApproval() external;
 }
