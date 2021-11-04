@@ -190,12 +190,12 @@ contract XeldoradoVault is IXeldoradoVault{
         
         if (startliquidfill >3)
         {
-            require(FLOBalance<= 2 * (IERC20X(token).balanceOf(address(this)).sub(_amount.mul(10 ** 18))), 'Xeldorado: fully subscribed');
+            require(FLOBalance<= 2 * (IERC20X(token).balanceOf(address(this)).sub(_amount.mul(10 ** 18))), 'Xeldorado: amount beyond fully subscription');
             (uint ctreserve, uint btreserve, ) = IXeldoradoPair(pair).getReserves();
             minpriceofbasetoken = (btreserve * 10 ** 18)/ctreserve;
         }
         else{
-            require(initialBalance<= 2 * (IERC20X(token).balanceOf(address(this)).sub(_amount.mul(10 ** 18))), 'Xeldorado: fully subscribed');
+            require(initialBalance<= 2 * (IERC20X(token).balanceOf(address(this)).sub(_amount.mul(10 ** 18))), 'Xeldorado: amount beyond fully subscription');
         }
         
         require(minpriceofbasetoken <= _bidpriceofbasetoken, 'Xeldorado: please bid higher than min price');
@@ -226,7 +226,7 @@ contract XeldoradoVault is IXeldoradoVault{
         return (initialBalance.sub(tokenbalance).mul(20000)/initialBalance); // (InitialBalance - CurrentBalance )/(InitialBalance/2) on scale of 10000 so 97.58% = 9758
     }
     
-    function endLiquidityFilling() public virtual override lock {
+    function endLiquidityFilling() public virtual override {
         if(((block.timestamp.sub(liquidityFillStartTime)) / (60)) >= ICTOmin){
             if(startliquidfill>3) require(IERC20X(token).transfer(pair, FLOBalance.sub(IERC20X(token).balanceOf(address(this)))),'Xeldorado: creator token transfer to Pair failed');
             else require(IERC20X(token).transfer(pair, initialBalance.sub(IERC20X(token).balanceOf(address(this)))),'Xeldorado: transfer 3 failed');
