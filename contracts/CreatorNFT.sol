@@ -24,12 +24,13 @@ contract CreatorNFT is ERC721URIStorage {
         return newItemId;
     }
     
-    function createBatchToken(string[] memory tokenURI, address _vault) public returns (uint[] memory newItemId){
+    function createBatchToken(string[] memory tokenURI, address _vault) public returns(uint start, uint end){
+        start = _tokenIds.current() + 1;
         for(uint i=0;i<tokenURI.length;i++){
             _tokenIds.increment();
-            newItemId[i] = _tokenIds.current();
-            _mint(_vault, newItemId[i]);
-            _setTokenURI(newItemId[i],tokenURI[i]);
+            _mint(_vault, _tokenIds.current());
+            _setTokenURI(_tokenIds.current(),tokenURI[i]);
         }
+        end = _tokenIds.current();
     }
 }

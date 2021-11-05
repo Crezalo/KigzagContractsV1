@@ -8,11 +8,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 // Sixty percent of all X will be distributed to community members, while the remaining 40% will be for investors, advisers and Xeldorado team members. 
 // Once the total of 1 billion X is distributed, X will be an inflationary token with a perpetual inflation rate of 2%
 
-// this is a test contract which paves way for Xeldorado to launch an exchange utility + governance 
-// token to allow token holders to trade at discounted fees in future however the support for this
-// is already available in the core contracts including Vault and Pair Contract.
-// Currently this part is switched off
-
 contract XeldoradoToken is ERC20{
     string private _name;
     string private _symbol;

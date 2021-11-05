@@ -6,8 +6,8 @@ import '../interfaces/IERC20X.sol';
 import "./SafeMath.sol";
 
 // import './CreatorToken.sol';
-import '../XeldoradoVault.sol';
-import '../CreatorVestingVault.sol';
+// import '../XeldoradoVault.sol';
+// import '../CreatorVestingVault.sol';
 
 library XeldoradoLibrary1 {
     using SafeMath for uint;

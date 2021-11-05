@@ -65,6 +65,26 @@ contract XeldoradoRoute {
         return IXeldoradoFactory(factory).fee();
     }
     
+    function discount() public view returns(uint){
+        return IXeldoradoFactory(factory).discount();
+    }
+    
+    function VestingDuration() public view returns(uint){
+        return IXeldoradoFactory(factory).VestingDuration();
+    }
+    
+    function noOFTokensForDiscount() public view returns(uint){
+        return IXeldoradoFactory(factory).noOFTokensForDiscount();
+    }
+    
+    function exchangeToken() public view returns(address){
+        return IXeldoradoFactory(factory).exchangeToken();
+    }
+    
+    function migrationApprover() public view returns(address){
+        return IXeldoradoFactory(factory).migrationApprover();
+    }
+    
     function xeldoradoCreatorFactory() public view returns (address){
         return IXeldoradoFactory(factory).xeldoradoCreatorFactory();
     }

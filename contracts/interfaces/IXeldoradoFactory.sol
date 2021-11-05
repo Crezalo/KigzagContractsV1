@@ -9,6 +9,7 @@ interface IXeldoradoFactory {
     function feeToSetter() external view returns (address);
     function fee() external view returns(uint);
     function discount() external view returns(uint);
+    function VestingDuration() external view returns(uint);
     function noOFTokensForDiscount() external view returns(uint);
     function exchangeToken() external view returns(address);
     function migrationApprover() external view returns(address);

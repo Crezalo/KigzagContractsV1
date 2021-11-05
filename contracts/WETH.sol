@@ -7,11 +7,11 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract WETH is ERC20{
     string private _name;
     string private _symbol;
-    uint256 private _totalSupply = 111888 * 10 ** 18;
+    uint256 private _totalSupply = 1111888 * 10 ** 18;
 
     constructor() ERC20 ('Wrapped ETH','WETH'){
         // _name = name_;
         // _symbol = symbol_;
-        _mint(msg.sender,111888 * 10 ** 18);
+        _mint(msg.sender,1111888 * 10 ** 18);
     }
 }

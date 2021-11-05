@@ -14,6 +14,7 @@ contract CreatorVestingVault is ICreatorVestingVault {
     address public override ctoken;
     address public override creator;
     uint private isInitialised;
+    uint private duration;
     
     uint private unlocked;
     
@@ -29,25 +30,27 @@ contract CreatorVestingVault is ICreatorVestingVault {
         unlocked = 1;
     }
     
-    function initialize(address _ctoken, address _creator) public override lock {
+    function initialize(address _ctoken, address _creator, uint _duration) public override lock {
         require(isInitialised==0,'Xeldorado: already isInitialised');
         isInitialised = 1;
         startTimeStamp = block.timestamp;
         ctoken = _ctoken;
         creator = _creator;
+        duration = _duration;
         initialCreatorVVBalance = IERC20X(ctoken).balanceOf(address(this));
         currentCreatorVVBalance = initialCreatorVVBalance;
     }
     
-    // 2% of the starting total supply = 1111888 * 10^18 * 0.02
-    // sub 2% of total amount times number of months passed bsically 22237.76 tokens can be sold by creator in one month
+    
     function minimumCreatorBalance() public view override returns(uint){
-        return initialCreatorVVBalance.sub((block.timestamp.sub(startTimeStamp)).mul(2223776 * 10 ** 16) / (24 * 60 * 60 * 30 ));
+        if((block.timestamp.sub(startTimeStamp)).div(duration) > 1) return 0;
+        return initialCreatorVVBalance.sub(initialCreatorVVBalance.mul(block.timestamp.sub(startTimeStamp)).div(duration));
     }
     
+    // in proportion to time spent since start  amount from vesting vault can be redeemed by the creator
     function redeemedVestedTokens(uint amount) public override lock {
-        require(amount<= currentCreatorVVBalance.sub(minimumCreatorBalance()),'Xeldorado: cannot redeem more than 2% a month');
-        currentCreatorVVBalance = currentCreatorVVBalance - amount;
+        require(amount<= currentCreatorVVBalance.sub(minimumCreatorBalance()),'Xeldorado: vesting limit reached');
+        currentCreatorVVBalance = currentCreatorVVBalance.sub(amount);
         IERC20X(ctoken).transfer(creator,amount);
         emit AmountVested(creator, ctoken, amount);
     }

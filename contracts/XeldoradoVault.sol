@@ -81,11 +81,11 @@ contract XeldoradoVault is IXeldoradoVault{
     
     
     function addNFTByCreateNewCollection_Batch(string[] memory _tokenURI) public virtual override lock {
-        uint[] memory tokenId = nftcontract.createBatchToken(_tokenURI, address(this));
-        for(uint i=0;i<tokenId.length;i++)
+        (uint start, uint end) = nftcontract.createBatchToken(_tokenURI, address(this));
+        for(uint i=0;i<end-start+1;i++)
         {
             vaultIdTonftContract[allNFTs] = address(nftcontract);
-            vaultIdToTokenId[allNFTs] = tokenId[i];
+            vaultIdToTokenId[allNFTs] = start+i;
             allNFTs +=  1;
             emit NFTadded(vaultIdTonftContract[allNFTs-1], vaultIdToTokenId[allNFTs-1]);
         }
@@ -112,7 +112,16 @@ contract XeldoradoVault is IXeldoradoVault{
         
         IERC721(vaultIdTonftContract[_vaultId]).transferFrom(address(this), _to, vaultIdToTokenId[_vaultId]);
         ICreatorToken(token).burnTokens(_to, singleNFTPrice()); //burn creator tokens equivalent to 1 NFT from _to address
-        ICreatorToken(token).mintTokens(_feeTo, calculateFee(singleNFTPrice(), _xfee.mul(10))); //mint xfee in creator token
+        
+        // ICreatorToken(token).mintTokens(_feeTo, calculateFee(singleNFTPrice(), _xfee.mul(10))); //mint xfee in creator token
+        
+        if(IXeldoradoFactory(IXeldoradoPair(pair).factory()).noOFTokensForDiscount() <= IERC20X(IXeldoradoFactory(IXeldoradoPair(pair).factory()).exchangeToken()).balanceOf(_to))
+        {
+           ICreatorToken(token).mintTokens(_feeTo, calculateFee(singleNFTPrice(), _xfee.sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10))); //mint xfee in creator token 
+        }
+        else{
+            ICreatorToken(token).mintTokens(_feeTo, calculateFee(singleNFTPrice(), _xfee.mul(10))); //mint xfee in creator token 
+        }
         
         redeemedNFTs.push(_vaultId);
         allRedeemedNFTs += 1;
@@ -164,7 +173,7 @@ contract XeldoradoVault is IXeldoradoVault{
         pair = _pair;
         liquidityFillStartTime = block.timestamp;
         ICTOmin = _min;
-        ICreatorVestingVault(creatorVestingVault).initialize(token, creator);
+        ICreatorVestingVault(creatorVestingVault).initialize(token, creator, IXeldoradoFactory(IXeldoradoPair(pair).factory()).VestingDuration());
         emit liquidityFillStarted(token,_basetoken,_minpriceofbasetoken);
 
     }
@@ -222,7 +231,7 @@ contract XeldoradoVault is IXeldoradoVault{
     function viewLiquidityFiling() public virtual override view returns(uint percent){
         require(startliquidfill%3 == 1, 'Xeldorado: liquidity filling either not started or already done');
         uint tokenbalance = IERC20X(token).balanceOf(address(this));
-        if(startliquidfill>3) return (FLOBalance.sub(tokenbalance).mul(2*10**18)/FLOBalance);
+        if(startliquidfill>3) return (FLOBalance.sub(tokenbalance).mul(20000)/FLOBalance);
         return (initialBalance.sub(tokenbalance).mul(20000)/initialBalance); // (InitialBalance - CurrentBalance )/(InitialBalance/2) on scale of 10000 so 97.58% = 9758
     }
     

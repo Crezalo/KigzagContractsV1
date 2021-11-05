@@ -118,7 +118,6 @@ contract XeldoradoPair is IXeldoradoPair {
             
             require(to != token0 && to != token1, 'Xeldorado: INVALID_TO');
             
-            
             //take approval from to
             require(IERC20X(token0).transferFrom(to, address(this), amountIn),'Xeldorado: amount In transfer failed');
             // charge exchange fee

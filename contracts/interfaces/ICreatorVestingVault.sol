@@ -13,5 +13,5 @@ interface ICreatorVestingVault {
     
     function minimumCreatorBalance() external view returns(uint);
     function redeemedVestedTokens(uint amount) external;
-    function initialize(address _ctoken, address _creator) external;
+    function initialize(address _ctoken, address _creator, uint _duration) external;
 }

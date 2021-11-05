@@ -10,6 +10,7 @@ contract XeldoradoFactory is IXeldoradoFactory {
     address public override feeToSetter;
     uint public override fee;
     uint public override discount;
+    uint public override VestingDuration;
     uint public override noOFTokensForDiscount;
     address public override exchangeToken;
     address public override migrationApprover;
@@ -91,6 +92,11 @@ contract XeldoradoFactory is IXeldoradoFactory {
     function setExchangeToken(address _exchangeToken) public {
         require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
         exchangeToken = _exchangeToken;
+    }
+    
+    function setVestingDuration(uint _duration) public {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        VestingDuration = _duration;
     }
     
     function migrationApproval(address _migrationApprover) public {

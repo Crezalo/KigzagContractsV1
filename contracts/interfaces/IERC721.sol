@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/introspection/IERC165.sol';
+import '@openzeppelin/contracts/utils/introspection/IERC165.sol';
 
 interface IERC721 is IERC165 {
 
