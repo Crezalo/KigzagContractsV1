@@ -9,22 +9,22 @@ What we do: [Understand](https://nft.xeldorado.live/index.html#xeldoradoprotocol
 
 White paper for Xeldorado Protocol is currently under development.
 
-## Community
-
-<a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://nft.xeldorado.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://t.me/xeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://twitter.com/RealXeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://www.reddit.com/r/Xeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/reddit.png" width="80" height="80"/></a>
-
 ## Licensing
 
-The primary license for Xeldorado Contracts V1 is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE).
+The primary license for Xeldorado Contracts V1 is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE). Overall repository is not available for production use.
 
 ### Exceptions
 
 - All files in `contracts/interfaces/` are licensed under `GPL-2.0-or-later` (as indicated in their SPDX headers), see [`contracts/interfaces/LICENSE`](./contracts/interfaces/LICENSE)
 - Several files in `contracts/libraries/` are licensed under `GPL-2.0-or-later` (as indicated in their SPDX headers), see [`contracts/libraries/LICENSE`](contracts/libraries/LICENSE)
 - All files in `contracts/test` remain unlicensed.
+
+## Community
+
+<a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://nft.xeldorado.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://t.me/xeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://twitter.com/RealXeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://www.reddit.com/r/Xeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/reddit.png" width="80" height="80"/></a>
 
 ## Responsible disclosure
 
