@@ -16,7 +16,7 @@ The primary license for Xeldorado Contracts V1 is the Business Source License 1.
 <h3>
     
 ```diff
-! ! ! Overall this repository is not available for production use currently ! ! !
+!!! Overall this repository is not available for production use currently !!!
 ```
 
 </h3>
