@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
 import './CreatorNFT.sol';
@@ -240,6 +240,7 @@ contract XeldoradoVault is IXeldoradoVault{
             if(startliquidfill>3) require(IERC20X(token).transfer(pair, FLOBalance.sub(IERC20X(token).balanceOf(address(this)))),'Xeldorado: creator token transfer to Pair failed');
             else require(IERC20X(token).transfer(pair, initialBalance.sub(IERC20X(token).balanceOf(address(this)))),'Xeldorado: transfer 3 failed');
             require(IERC20X(token).transfer(creatorVestingVault, IERC20X(token).balanceOf(address(this))),'Xeldorado: transfer 4 failed');
+            ICreatorVestingVault(creatorVestingVault).currentBalanceUpdate();
             require(IERC20X(basetoken).transfer(pair,IERC20X(basetoken).balanceOf(address(this))),'Xeldorado: transfer 5 failed');
             startliquidfill = startliquidfill + 2;
             IXeldoradoPair(pair).LiquidityAdded();

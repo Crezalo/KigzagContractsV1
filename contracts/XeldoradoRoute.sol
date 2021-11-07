@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
 import './interfaces/IXeldoradoFactory.sol';
@@ -353,7 +353,11 @@ contract XeldoradoRoute {
         return ICreatorVestingVault(_creatorVestingVault).currentCreatorVVBalance();
     }
     
-    function creatorVVMinimumCreatorBalancee(address _creatorVestingVault) public view returns(uint){
+    function creatorVVcurrentBalanceUpdate(address _creatorVestingVault) public {
+        ICreatorVestingVault(_creatorVestingVault).currentBalanceUpdate();
+    }
+    
+    function creatorVVMinimumCreatorBalance(address _creatorVestingVault) public view returns(uint){
         return ICreatorVestingVault(_creatorVestingVault).minimumCreatorBalance();
     }
     

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
 import './interfaces/IERC20X.sol';
@@ -39,6 +39,10 @@ contract CreatorVestingVault is ICreatorVestingVault {
         duration = _duration;
         initialCreatorVVBalance = IERC20X(ctoken).balanceOf(address(this));
         currentCreatorVVBalance = initialCreatorVVBalance;
+    }
+    
+    function currentBalanceUpdate() public override lock {
+        currentCreatorVVBalance = IERC20X(ctoken).balanceOf(address(this));
     }
     
     

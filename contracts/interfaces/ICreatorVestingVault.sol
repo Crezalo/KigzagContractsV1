@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
 interface ICreatorVestingVault {
@@ -10,7 +10,7 @@ interface ICreatorVestingVault {
     function ctoken() external view returns(address);
     function creator() external view returns(address);
     
-    
+    function currentBalanceUpdate() external;
     function minimumCreatorBalance() external view returns(uint);
     function redeemedVestedTokens(uint amount) external;
     function initialize(address _ctoken, address _creator, uint _duration) external;
