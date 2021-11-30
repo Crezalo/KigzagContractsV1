@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
 import './interfaces/IERC20X.sol';
@@ -7,6 +7,7 @@ import './libraries/SafeMath.sol';
 import './libraries/UQ112x112.sol';
 import './libraries/XeldoradoLibrary1.sol';
 import './interfaces/IXeldoradoPair.sol';
+import './interfaces/ICreatorToken.sol';
 import './interfaces/IXeldoradoFactory.sol';
 import './interfaces/IXeldoradoCreatorFactory.sol';
 
@@ -36,7 +37,7 @@ contract XeldoradoPair is IXeldoradoPair {
     
     uint private startTimeStamp;
     uint private unlocked;
-    bool private migrationApproved;
+    // bool private migrationApproved;
     modifier lock() {
         require(unlocked == 1, 'Xeldorado: LOCKED');
         unlocked = 0;
@@ -65,13 +66,8 @@ contract XeldoradoPair is IXeldoradoPair {
     // );
     // event Sync(uint112 reserve0, uint112 reserve1);
 
-    constructor() {
+    constructor(address _token0, address _token1, address _creator, address _factory, address _creatorfactory) {
         admin = msg.sender;// xeldorado factory
-    }
-
-    // called once by the admin at time of deployment
-    function initialize(address _token0, address _token1, address _creator, address _factory, address _creatorfactory) public virtual override {
-        require(msg.sender == admin, 'Xeldorado: FORBIDDEN'); // sufficient check
         token0 = _token0;
         token1 = _token1;
         creator = _creator;
@@ -104,6 +100,8 @@ contract XeldoradoPair is IXeldoradoPair {
     
     // this low-level function should be called from a contract which performs important safety checks
     function swap(address tokenIn, uint amountIn, address tokenOut, uint amountOut, address to) public virtual override lock {
+        require(IXeldoradoFactory(factory).haltPairTrading(address(this)) != true ,'Xeldorado: trading is halted for given pair');
+        require(IXeldoradoFactory(factory).haltAllPairsTrading() != true ,'Xeldorado: trading is halted for all pairs');
         require((tokenIn==token0 && tokenOut==token1) || (tokenIn==token1 && tokenOut==token0), 'Xeldorado: one or both tokens dont match the pair');
         require(amountIn > 0 && amountOut > 0, 'Xeldorado: INSUFFICIENT_OUTPUT_AMOUNT');
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
@@ -123,15 +121,15 @@ contract XeldoradoPair is IXeldoradoPair {
             // charge exchange fee
             if(IXeldoradoFactory(factory).noOFTokensForDiscount() <= IERC20X(IXeldoradoFactory(factory).exchangeToken()).balanceOf(to))
             {
-                require(IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary1.calculateFee(amountOut, IXeldoradoFactory(factory).fee().sub(IXeldoradoFactory(factory).discount()).mul(10))),'Xeldorado: exchange fee transfer failed');
+                require(IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary1.calculateFee(amountOut, IXeldoradoFactory(factory).swapFee().sub(IXeldoradoFactory(factory).discount()).mul(10))),'Xeldorado: exchange fee transfer failed');
             }
             else{
-                require(IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary1.calculateFee(amountOut, IXeldoradoFactory(factory).fee().mul(10))),'Xeldorado: exchange fee transfer failed');
+                require(IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary1.calculateFee(amountOut, IXeldoradoFactory(factory).swapFee().mul(10))),'Xeldorado: exchange fee transfer failed');
             }
             // charge creator royalty fee
             require(IERC20X(token1).transfer(creator, XeldoradoLibrary1.calculateFee(amountOut, IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator))),'Xeldorado: creator fee transfer failed');
             //transfer amountOut to to
-            require(IERC20X(token1).transfer(to,amountOut.sub(XeldoradoLibrary1.calculateFee(amountOut, IXeldoradoFactory(factory).fee().mul(10))).sub(XeldoradoLibrary1.calculateFee(amountOut, IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator)))), 'Xeldorado: amount Out transfer failed');
+            require(IERC20X(token1).transfer(to,amountOut.sub(XeldoradoLibrary1.calculateFee(amountOut, IXeldoradoFactory(factory).swapFee().mul(10))).sub(XeldoradoLibrary1.calculateFee(amountOut, IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator)))), 'Xeldorado: amount Out transfer failed');
             
             balance0 = IERC20X(token0).balanceOf(address(this));
             balance1 = IERC20X(token1).balanceOf(address(this));
@@ -140,7 +138,7 @@ contract XeldoradoPair is IXeldoradoPair {
         }
         else {
             require(amountOut < _reserve0, 'Xeldorado: INSUFFICIENT_LIQUIDITY');
-            uint amountIn_up = amountIn.sub(XeldoradoLibrary1.calculateFee(amountIn, IXeldoradoFactory(factory).fee().mul(10))).sub(IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator)); // after fee deductions
+            uint amountIn_up = amountIn.sub(XeldoradoLibrary1.calculateFee(amountIn, IXeldoradoFactory(factory).swapFee().mul(10))).sub(IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator)); // after fee deductions
             if(XeldoradoLibrary1.getAmountOut(amountIn_up,_reserve1,reserve0) >= amountOut) amountOut = XeldoradoLibrary1.getAmountOut(amountIn_up,_reserve1,reserve0);
             else require(0>1, 'Xeldorado:cannot swap for mentioned amount out');
             
@@ -152,10 +150,10 @@ contract XeldoradoPair is IXeldoradoPair {
             // charge exchange fee
             if(IXeldoradoFactory(factory).noOFTokensForDiscount() <= IERC20X(IXeldoradoFactory(factory).exchangeToken()).balanceOf(to))
             {
-                require(IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary1.calculateFee(amountIn, IXeldoradoFactory(factory).fee().sub(IXeldoradoFactory(factory).discount()).mul(10))),'Xeldorado: exchange fee transfer failed');
+                require(IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary1.calculateFee(amountIn, IXeldoradoFactory(factory).swapFee().sub(IXeldoradoFactory(factory).discount()).mul(10))),'Xeldorado: exchange fee transfer failed');
             }
             else{
-                require(IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary1.calculateFee(amountIn, IXeldoradoFactory(factory).fee().mul(10))),'Xeldorado: exchange fee transfer failed');
+                require(IERC20X(token1).transfer(IXeldoradoFactory(factory).feeTo(), XeldoradoLibrary1.calculateFee(amountIn, IXeldoradoFactory(factory).swapFee().mul(10))),'Xeldorado: exchange fee transfer failed');
             }
             // charge creator royalty fee
             require(IERC20X(token1).transfer(creator, XeldoradoLibrary1.calculateFee(amountIn, IXeldoradoCreatorFactory(creatorfactory).creatorFee(creator))),'Xeldorado: creator fee transfer failed');
@@ -187,14 +185,15 @@ contract XeldoradoPair is IXeldoradoPair {
     }
     
     // Use web3 and interface for below functions
-    function migrateLiquidityToV2_createRequest() public virtual override {
-        require(msg.sender == creator, 'Xeldorado: Only creator');
-        migrationApproved = true;
-        emit migrationPairRequestCreated();
-    }
+    // function migrateLiquidityToV2_createRequest() public virtual override {
+    //     require(msg.sender == creator, 'Xeldorado: Only creator');
+    //     migrationApproved = true;
+    //     emit migrationPairRequestCreated();
+    // }
     
-    function migrationApprove(address toContract) public virtual override lock {
-        require((msg.sender == IXeldoradoFactory(factory).migrationApprover() && migrationApproved), 'Xeldorado: only migration contract');
+    function migrationApprove(address toContract, uint totalTokenHolders) public virtual override lock {
+        bool votingPassed = ICreatorToken(token0).migrationContractPassed(IXeldoradoFactory(factory).migrationVoterThreshold() , IXeldoradoFactory(factory).migrationVoterTokenThreshold() , totalTokenHolders);
+        require((msg.sender == IXeldoradoFactory(factory).migrationContract() && votingPassed && (ICreatorToken(token0).migrationContract() == IXeldoradoFactory(factory).migrationContract())), 'Xeldorado: only migrator allowed after creator approves migration and voting success and migration contract match with voted one');
         IERC20X(token0).transfer(toContract, IERC20X(token0).balanceOf(address(this)));
         IERC20X(token1).transfer(toContract, IERC20X(token1).balanceOf(address(this)));
         emit migrationPairRequestApproved(toContract);

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
 import './CreatorToken.sol';
@@ -6,6 +6,7 @@ import './CreatorToken.sol';
 import './CreatorVestingVault.sol';
 import './interfaces/IXeldoradoCreatorFactory.sol';
 import './interfaces/IXeldoradoVault.sol';
+import './interfaces/IXeldoradoFactory.sol';
 // import './libraries/XeldoradoLibrary1.sol';
 
 contract XeldoradoCreatorFactory is IXeldoradoCreatorFactory{
@@ -14,15 +15,21 @@ contract XeldoradoCreatorFactory is IXeldoradoCreatorFactory{
     mapping(address => address) public override creatorVestingVault;
     mapping(address => uint) public override creatorFee;
     address[] public override allCreators;
+
+    address factory;
+
+    constructor() {
+        factory = msg.sender;   
+    }
     
     function newCreator(address _creator, uint _creatorFee) public virtual override {
-        require(_creatorFee <= 5, 'Xeldorado: creator fee limit'); // scale of 10000 //cannot charge more than 0.05%
+        require(_creatorFee <= IXeldoradoFactory(factory).maxCreatorFee(), 'Xeldorado: creator fee limit'); // scale of 10000 //cannot charge more than max creator fee set eg 0.1%
         allCreators.push(_creator);
         creatorFee[_creator] = _creatorFee;
     }
     
     function updateCreatorFee(address _creator, uint _creatorFee) public virtual override {
-        require(_creatorFee <= 5, 'Xeldorado: creator fee limit'); // scale of 10000 //cannot charge more than 0.05%
+        require(_creatorFee <= IXeldoradoFactory(factory).maxCreatorFee(), 'Xeldorado: creator fee limit'); // scale of 10000 //cannot charge more than max creator fee set eg 0.1% 
         creatorFee[_creator] = _creatorFee;
     }
     
@@ -35,7 +42,7 @@ contract XeldoradoCreatorFactory is IXeldoradoCreatorFactory{
     
     function generateCreatorVault(address _creator, string memory _name, string memory _symbol, address cvault) public virtual override returns (address token){
         require(creatorVault[_creator] == address(0),'Xeldorado: Vault exist');
-        CreatorVestingVault cvvault_o = new CreatorVestingVault();
+        CreatorVestingVault cvvault_o = new CreatorVestingVault(factory, cvault);
         address cvvault = address(cvvault_o);
         token = _mintCreatorToken(_creator, cvvault, _name, _symbol, cvault);
         IXeldoradoVault(cvault).initialize(token,address(cvvault));
@@ -49,10 +56,13 @@ contract XeldoradoCreatorFactory is IXeldoradoCreatorFactory{
         require(creatorToken[_creator] == address(0),'Xeldorado: Token exist');
         require(_vault != address(0),'Xeldorado: address empty'); //  check is sufficient
         // token = XeldoradoLibrary.CreatorFactory_mintCreatorToken_Internal(_name, _symbol, _creatorVestingVault, _vault);
-        CreatorToken ctoken = new CreatorToken(_name, _symbol, _creatorVestingVault, _vault);
+        CreatorToken ctoken = new CreatorToken(_name, _symbol, _creatorVestingVault, _vault, IXeldoradoFactory(factory).totalCreatorTokenSupply(), IXeldoradoFactory(factory).percentCreatorOwnership());
         token = address(ctoken);
         creatorToken[_creator] = token;
         emit CreatorTokenMinted(token,_creator);
     }
     
+    function syncMigrationContractVoting(address _creator, uint totalTokenHolders) public virtual override {
+        ICreatorToken(creatorToken[_creator]).migrationVotingStatusSync(IXeldoradoFactory(factory).migrationVoterThreshold(),IXeldoradoFactory(factory).migrationVoterTokenThreshold(), totalTokenHolders, IXeldoradoFactory(factory).migrationDuration());
+    }
 }

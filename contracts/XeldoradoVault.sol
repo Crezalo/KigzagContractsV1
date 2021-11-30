@@ -6,6 +6,7 @@ import './interfaces/IERC20X.sol';
 import './interfaces/ICreatorToken.sol';
 import './interfaces/IXeldoradoVault.sol';
 import './interfaces/IXeldoradoFactory.sol';
+import './interfaces/IXeldoradoCreatorFactory.sol';
 import './interfaces/IXeldoradoPair.sol';
 import './interfaces/ICreatorVestingVault.sol';
 import './libraries/SafeMath.sol';
@@ -14,7 +15,6 @@ import './libraries/SafeMath.sol';
 contract XeldoradoVault is IXeldoradoVault{
     using SafeMath  for uint;
     
-    // address private admin;
     address public override creator;
     address public override creatorVestingVault;
     address public override token;
@@ -37,7 +37,7 @@ contract XeldoradoVault is IXeldoradoVault{
     
     uint private unlocked;
     uint public override ICTOmin;
-    bool private migrationApproved;
+    // bool private migrationApproved;
     
     modifier lock() {
         require(unlocked == 1, 'Xeldorado: LOCKED');
@@ -55,7 +55,6 @@ contract XeldoradoVault is IXeldoradoVault{
     }
     
     function initialize(address _token, address _creatorVestingVault) public virtual override {
-        // require(msg.sender == admin, 'Xeldorado: Forbidden');
         token = _token;
         creatorVestingVault = _creatorVestingVault;
         initialBalance = IERC20X(token).balanceOf(address(this));
@@ -67,6 +66,8 @@ contract XeldoradoVault is IXeldoradoVault{
         vaultIdTonftContract[allNFTs] = _nft;
         vaultIdToTokenId[allNFTs] = _tokenId;
         allNFTs +=  1;
+        ICreatorToken(token).mintTokens(creatorVestingVault, singleNFTPrice());
+        ICreatorVestingVault(creatorVestingVault).currentBalanceUpdate();
         emit NFTadded(vaultIdTonftContract[allNFTs-1], vaultIdToTokenId[allNFTs-1]);
     }
     
@@ -76,6 +77,8 @@ contract XeldoradoVault is IXeldoradoVault{
         vaultIdTonftContract[allNFTs] = address(nftcontract);
         vaultIdToTokenId[allNFTs] = tokenId;
         allNFTs +=  1;
+        ICreatorToken(token).mintTokens(creatorVestingVault, singleNFTPrice());
+        ICreatorVestingVault(creatorVestingVault).currentBalanceUpdate();
         emit NFTadded(vaultIdTonftContract[allNFTs-1], vaultIdToTokenId[allNFTs-1]);
     }
     
@@ -89,6 +92,8 @@ contract XeldoradoVault is IXeldoradoVault{
             allNFTs +=  1;
             emit NFTadded(vaultIdTonftContract[allNFTs-1], vaultIdToTokenId[allNFTs-1]);
         }
+        ICreatorToken(token).mintTokens(creatorVestingVault, singleNFTPrice().mul(end-start+1));
+        ICreatorVestingVault(creatorVestingVault).currentBalanceUpdate();
     }
     
     function singleNFTPrice() public virtual override view returns(uint){
@@ -107,20 +112,22 @@ contract XeldoradoVault is IXeldoradoVault{
         return amount.mul(fee)/10000;
     }
     
-    function redeemNFT(address _to, uint _vaultId, uint _xfee, address _feeTo) public virtual override lock {
+    function redeemNFT(address _to, uint _vaultId) public virtual override lock {
+
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltPairTrading(address(this)) != true ,'Xeldorado: trading is halted for given pair');
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltAllPairsTrading() != true ,'Xeldorado: trading is halted for all pairs');
         require(_exist(redeemedNFTs, _vaultId) == false, 'Xeldorado: Already reedemed!');
         
         IERC721(vaultIdTonftContract[_vaultId]).transferFrom(address(this), _to, vaultIdToTokenId[_vaultId]);
         ICreatorToken(token).burnTokens(_to, singleNFTPrice()); //burn creator tokens equivalent to 1 NFT from _to address
         
-        // ICreatorToken(token).mintTokens(_feeTo, calculateFee(singleNFTPrice(), _xfee.mul(10))); //mint xfee in creator token
-        
-        if(IXeldoradoFactory(IXeldoradoPair(pair).factory()).noOFTokensForDiscount() <= IERC20X(IXeldoradoFactory(IXeldoradoPair(pair).factory()).exchangeToken()).balanceOf(_to))
-        {
-           ICreatorToken(token).mintTokens(_feeTo, calculateFee(singleNFTPrice(), _xfee.sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10))); //mint xfee in creator token 
+        if(IXeldoradoFactory(IXeldoradoPair(pair).factory()).noOFTokensForDiscount() <= IERC20X(IXeldoradoFactory(IXeldoradoPair(pair).factory()).exchangeToken()).balanceOf(_to)) {
+        //    ICreatorToken(token).mintTokens(IXeldoradoFactory(IXeldoradoPair(pair).factory()).feeTo(), calculateFee(singleNFTPrice(), IXeldoradoFactory(IXeldoradoPair(pair).factory()).redeemNftFee().sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10))); //mint xfee in creator token 
+            require(ICreatorToken(token).transferFrom(_to, IXeldoradoFactory(IXeldoradoPair(pair).factory()).feeTo(), calculateFee(singleNFTPrice(), IXeldoradoFactory(IXeldoradoPair(pair).factory()).redeemNftFee().sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10))),'Xeldorado: xfee transfer fail'); //mint xfee in creator token 
         }
         else{
-            ICreatorToken(token).mintTokens(_feeTo, calculateFee(singleNFTPrice(), _xfee.mul(10))); //mint xfee in creator token 
+            // ICreatorToken(token).mintTokens(IXeldoradoFactory(IXeldoradoPair(pair).factory()).feeTo(), calculateFee(singleNFTPrice(), IXeldoradoFactory(IXeldoradoPair(pair).factory()).redeemNftFee().mul(10))); //mint xfee in creator token 
+            require(ICreatorToken(token).transferFrom(_to, IXeldoradoFactory(IXeldoradoPair(pair).factory()).feeTo(), calculateFee(singleNFTPrice(), IXeldoradoFactory(IXeldoradoPair(pair).factory()).redeemNftFee().mul(10))),'Xeldorado: xfee transfer fail'); //mint xfee in creator token 
         }
         
         redeemedNFTs.push(_vaultId);
@@ -144,19 +151,23 @@ contract XeldoradoVault is IXeldoradoVault{
       redeemedNFTs.pop();
     }
     
-    function ReturnOfRedeemedNFT(address _to, uint _vaultId, uint _xfee, address _feeTo) public virtual override lock {
+    function ReturnOfRedeemedNFT(address _to, uint _vaultId) public virtual override lock {
         // get approval
+
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltPairTrading(address(this)) != true ,'Xeldorado: trading is halted for given pair');
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltAllPairsTrading() != true ,'Xeldorado: trading is halted for all pairs');
+
         uint _redeemedNFTid = _findIndexOfVaultIdInRedeemendNFTArray(_vaultId);
         require(_redeemedNFTid != 10**18, 'Xeldorado: invalid vaultid');
         IERC721(vaultIdTonftContract[_vaultId]).transferFrom(_to, address(this), vaultIdToTokenId[_vaultId]);
         if(IXeldoradoFactory(IXeldoradoPair(pair).factory()).noOFTokensForDiscount() <= IERC20X(IXeldoradoFactory(IXeldoradoPair(pair).factory()).exchangeToken()).balanceOf(_to))
         {
-            ICreatorToken(token).mintTokens(_to, singleNFTPrice().sub(calculateFee(singleNFTPrice(), _xfee.sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10)))); // mint creator tokens
-            ICreatorToken(token).mintTokens(_feeTo, calculateFee(singleNFTPrice(), _xfee.sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10))); //mint xfee in creator token 
+            ICreatorToken(token).mintTokens(_to, singleNFTPrice().sub(calculateFee(singleNFTPrice(), IXeldoradoFactory(IXeldoradoPair(pair).factory()).returnNftFee().sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10)))); // mint creator tokens
+            ICreatorToken(token).mintTokens(IXeldoradoFactory(IXeldoradoPair(pair).factory()).feeTo(), calculateFee(singleNFTPrice(), IXeldoradoFactory(IXeldoradoPair(pair).factory()).returnNftFee().sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10))); //mint xfee in creator token 
         }
         else{
-            ICreatorToken(token).mintTokens(_to,singleNFTPrice().sub(calculateFee(singleNFTPrice(), _xfee.mul(10)))); // mint creator tokens
-            ICreatorToken(token).mintTokens(_feeTo, calculateFee(singleNFTPrice(), _xfee.mul(10))); //mint xfee in creator token 
+            ICreatorToken(token).mintTokens(_to,singleNFTPrice().sub(calculateFee(singleNFTPrice(), IXeldoradoFactory(IXeldoradoPair(pair).factory()).returnNftFee().mul(10)))); // mint creator tokens
+            ICreatorToken(token).mintTokens(IXeldoradoFactory(IXeldoradoPair(pair).factory()).feeTo(), calculateFee(singleNFTPrice(), IXeldoradoFactory(IXeldoradoPair(pair).factory()).returnNftFee().mul(10))); //mint xfee in creator token 
         }
         
         _removeRedeemedNFTfromArray(_redeemedNFTid);
@@ -167,6 +178,7 @@ contract XeldoradoVault is IXeldoradoVault{
     
     function initializeLiquidityOffering(address _basetoken, uint _minpriceofbasetoken, address _pair, uint _min) public virtual override lock{
         require(startliquidfill == 0, 'Xeldorado: liquidity offering already initialized.');
+        require(allNFTs > 0, 'Xeldorado: add atleast one NFT before ICTO');
         basetoken = _basetoken;
         minpriceofbasetoken = _minpriceofbasetoken;
         startliquidfill = startliquidfill + 1;
@@ -175,11 +187,12 @@ contract XeldoradoVault is IXeldoradoVault{
         ICTOmin = _min;
         ICreatorVestingVault(creatorVestingVault).initialize(token, creator, IXeldoradoFactory(IXeldoradoPair(pair).factory()).VestingDuration());
         emit liquidityFillStarted(token,_basetoken,_minpriceofbasetoken);
-
     }
     
     function addTokensForFLO(uint amount) public virtual override lock {
-        IERC20X(token).transferFrom(creator, address(this), amount);
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltPairTrading(address(this)) != true ,'Xeldorado: trading is halted for given pair');
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltAllPairsTrading() != true ,'Xeldorado: trading is halted for all pairs');
+        ICreatorVestingVault(creatorVestingVault).addFLOBalanceToVault(amount);
         FLOBalance = amount;
     }
     
@@ -194,7 +207,9 @@ contract XeldoradoVault is IXeldoradoVault{
     }
     
     // Eg If _minpriceofbasetoken = 7 * 10^16 and buyer bids for 1 CT = 0.1 WETH then _bidpriceofbasetoken = 10 ^ 17 
-    function bidCreatorToken(address _buyer, uint _amount, uint _bidpriceofbasetoken, uint _xfee, uint _cfee,address _feeTo) public virtual override lock{
+    function bidCreatorToken(address _buyer, uint _amount, uint _bidpriceofbasetoken) public virtual override lock{
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltPairTrading(address(this)) != true ,'Xeldorado: trading is halted for given pair');
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltAllPairsTrading() != true ,'Xeldorado: trading is halted for all pairs');
         require(startliquidfill%3 == 1, 'Xeldorado: liquidity filling either not started or already done');
         
         if (startliquidfill >3)
@@ -215,15 +230,15 @@ contract XeldoradoVault is IXeldoradoVault{
         if(IXeldoradoFactory(IXeldoradoPair(pair).factory()).noOFTokensForDiscount() <= IERC20X(IXeldoradoFactory(IXeldoradoPair(pair).factory()).exchangeToken()).balanceOf(_buyer))
         {
             //xfee pass calculated fee // scale of 1000 
-            require(IERC20X(basetoken).transferFrom(_buyer, _feeTo,  calculateFee(_amount.mul(_bidpriceofbasetoken), _xfee.sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10))), 'Xeldorado: xfee paid');
+            require(IERC20X(basetoken).transferFrom(_buyer, IXeldoradoFactory(IXeldoradoPair(pair).factory()).feeTo(),  calculateFee(_amount.mul(_bidpriceofbasetoken), IXeldoradoFactory(IXeldoradoPair(pair).factory()).ictoFee().sub(IXeldoradoFactory(IXeldoradoPair(pair).factory()).discount()).mul(10))), 'Xeldorado: xfee transfer fail');
         }
         else{
             //xfee pass calculated fee // scale of 1000 
-            require(IERC20X(basetoken).transferFrom(_buyer, _feeTo,  calculateFee(_amount.mul(_bidpriceofbasetoken), _xfee.mul(10))), 'Xeldorado: xfee paid');
+            require(IERC20X(basetoken).transferFrom(_buyer, IXeldoradoFactory(IXeldoradoPair(pair).factory()).feeTo(),  calculateFee(_amount.mul(_bidpriceofbasetoken), IXeldoradoFactory(IXeldoradoPair(pair).factory()).ictoFee().mul(10))), 'Xeldorado: xfee transfer fail');
             
         }
         //cfee pass calculated fee // scale of 10000
-        require(IERC20X(basetoken).transferFrom(_buyer, creator,  calculateFee(_amount.mul(_bidpriceofbasetoken), _cfee)), 'Xeldorado: cfee paid');
+        require(IERC20X(basetoken).transferFrom(_buyer, creator,  calculateFee(_amount.mul(_bidpriceofbasetoken), IXeldoradoCreatorFactory(IXeldoradoPair(pair).creatorfactory()).creatorFee(creator))), 'Xeldorado: cfee paid');
         emit biddingCreatorToken(_buyer, _amount, _bidpriceofbasetoken);
         endLiquidityFilling();
     }
@@ -250,25 +265,24 @@ contract XeldoradoVault is IXeldoradoVault{
     
     // Use web3 and interface for below functions
     function approveDirectNFTTransfer(uint vaultId) public virtual override {
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltPairTrading(address(this)) != true ,'Xeldorado: trading is halted for given pair');
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltAllPairsTrading() != true ,'Xeldorado: trading is halted for all pairs');
         require(msg.sender == creator, 'Xeldorado: creator only');
         vaultIdTodrirectNFTTrasnfer[vaultId] = true;
     }
     
     function directTransferNFT(uint _vaultId, address _to) public virtual override lock {
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltPairTrading(address(this)) != true ,'Xeldorado: trading is halted for given pair');
+        require(IXeldoradoFactory(IXeldoradoPair(pair).factory()).haltAllPairsTrading() != true ,'Xeldorado: trading is halted for all pairs');
         require(msg.sender == creator, 'Xeldorado: creator only');
         IERC721(vaultIdTonftContract[_vaultId]).transferFrom(address(this), _to, vaultIdToTokenId[_vaultId]);
         redeemedNFTs.push(_vaultId);
         allRedeemedNFTs += 1;
     }
     
-    function migrateNFTToV2_createRequest() public virtual override {
-        require(msg.sender == creator, 'Xeldorado: creator only');
-        migrationApproved = true;
-        emit migrationVaultRequestCreated();
-    }
-    
-    function migrationApprove(address toContract) public virtual override lock {
-        require((msg.sender == IXeldoradoFactory(IXeldoradoPair(pair).factory()).migrationApprover() && migrationApproved), 'Xeldorado: migrator allowed after creator approves migration');
+    function migrationApprove(address toContract, uint totalTokenHolders) public virtual override lock {
+        bool votingPassed = ICreatorToken(token).migrationContractPassed(IXeldoradoFactory(IXeldoradoPair(pair).factory()).migrationVoterThreshold() , IXeldoradoFactory(IXeldoradoPair(pair).factory()).migrationVoterTokenThreshold() , totalTokenHolders);
+        require((msg.sender == IXeldoradoFactory(IXeldoradoPair(pair).factory()).migrationContract() && votingPassed && (ICreatorToken(token).migrationContract() == IXeldoradoFactory(IXeldoradoPair(pair).factory()).migrationContract())), 'Xeldorado: only migrator allowed after voting success and migration contract match with voted one');
         for(uint i; i< allNFTs; i++){
             if(_findIndexOfVaultIdInRedeemendNFTArray(i) == 10**18){
                 IERC721(vaultIdTonftContract[i]).transferFrom(address(this), toContract, vaultIdToTokenId[i]);

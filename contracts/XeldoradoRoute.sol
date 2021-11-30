@@ -5,6 +5,7 @@ import './interfaces/IXeldoradoFactory.sol';
 import './interfaces/IXeldoradoCreatorFactory.sol';
 import './interfaces/IXeldoradoVault.sol';
 import './interfaces/IXeldoradoPair.sol';
+import './interfaces/ICreatorToken.sol';
 import './interfaces/IERC20X.sol';
 import './interfaces/IERC721.sol';
 import './interfaces/ICreatorVestingVault.sol';
@@ -29,21 +30,6 @@ contract XeldoradoRoute {
         BaseTokens = _BaseTokens;
         admin = msg.sender;
     }
-    
-    function _checkTokenExistsInBaseTokens(address btoken) internal view returns(bool){
-        for(uint i=0;i<BaseTokens.length;i++){
-            if(BaseTokens[i]==btoken){
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    function addNewBaseToken(address btoken) public {
-        require(msg.sender==admin,'Xeldorado: forbidden');
-        IXeldoradoFactory(factory).addNewBaseToken(btoken);
-        BaseTokens.push(btoken);
-    }
 
     // receive() external payable {
     //     assert(msg.sender == BaseTokens); // only accept ETH via fallback from the BaseTokens contract
@@ -61,8 +47,24 @@ contract XeldoradoRoute {
         return IXeldoradoFactory(factory).feeToSetter();
     }
     
-    function fee() public view returns(uint){
-        return IXeldoradoFactory(factory).fee();
+    function swapFee() public view returns(uint){
+        return IXeldoradoFactory(factory).swapFee();
+    }
+    
+    function ictoFee() public view returns(uint){
+        return IXeldoradoFactory(factory).ictoFee();
+    }
+    
+    function redeemNftFee() public view returns(uint){
+        return IXeldoradoFactory(factory).redeemNftFee();
+    }
+    
+    function returnNftFee() public view returns(uint){
+        return IXeldoradoFactory(factory).returnNftFee();
+    }
+    
+    function maxCreatorFee() public view returns(uint){
+        return IXeldoradoFactory(factory).maxCreatorFee();
     }
     
     function discount() public view returns(uint){
@@ -73,6 +75,10 @@ contract XeldoradoRoute {
         return IXeldoradoFactory(factory).VestingDuration();
     }
     
+    function vestingCliffInt() public view returns(uint){
+        return IXeldoradoFactory(factory).vestingCliffInt();
+    }
+    
     function noOFTokensForDiscount() public view returns(uint){
         return IXeldoradoFactory(factory).noOFTokensForDiscount();
     }
@@ -81,8 +87,38 @@ contract XeldoradoRoute {
         return IXeldoradoFactory(factory).exchangeToken();
     }
     
-    function migrationApprover() public view returns(address){
-        return IXeldoradoFactory(factory).migrationApprover();
+    function totalCreatorTokenSupply() public view returns(uint){
+        return IXeldoradoFactory(factory).totalCreatorTokenSupply();
+    }
+    
+    function percentCreatorOwnership() public view returns(uint){
+        return IXeldoradoFactory(factory).percentCreatorOwnership();
+    }
+    
+    // migration contract
+    function migrationContract() public view returns(address){
+        return IXeldoradoFactory(factory).migrationContract();
+    }
+
+    // migration voting duration 
+    function migrationDuration() public view returns(uint){
+        return IXeldoradoFactory(factory).migrationDuration();
+    }
+
+    function migrationVoterThreshold() public view returns(uint){
+        return IXeldoradoFactory(factory).migrationVoterThreshold();
+    }
+
+    function migrationVoterTokenThreshold() public view returns(uint){
+        return IXeldoradoFactory(factory).migrationVoterTokenThreshold();
+    }
+
+    function haltPairTrading(address pair) public view returns(bool){
+        return IXeldoradoFactory(factory).haltPairTrading(pair);
+    }
+
+    function haltAllPairsTrading() public view returns(bool){
+        return IXeldoradoFactory(factory).haltAllPairsTrading();
     }
     
     function xeldoradoCreatorFactory() public view returns (address){
@@ -101,6 +137,10 @@ contract XeldoradoRoute {
         return IXeldoradoFactory(factory).allPairsLength();
     }
 
+    function checkTokenExistsInBaseTokens(address btoken) internal view returns(bool){
+        return IXeldoradoFactory(factory).checkTokenExistsInBaseTokens(btoken);
+    }
+
     function createPair(address tokenA, address tokenB) internal returns (address pair) {
         require(IXeldoradoCreatorFactory(xeldoradocreatorfactory).creatorExist(msg.sender),'Xeldorado: creator does not exist');
         return IXeldoradoFactory(factory).createPair(tokenA, tokenB, msg.sender);
@@ -109,21 +149,6 @@ contract XeldoradoRoute {
     //////////////////////////////////////////
     // ***** Creator Factory functions**** //
     ////////////////////////////////////////
-    
-    function newCreator(uint _creatorFee) public {
-        IXeldoradoCreatorFactory(xeldoradocreatorfactory).newCreator(msg.sender, _creatorFee);
-    }
-    
-    function updateCreatorFee(uint _creatorFee) public{
-        IXeldoradoCreatorFactory(xeldoradocreatorfactory).updateCreatorFee(msg.sender, _creatorFee);
-    }
-    
-    // Deploy vault contract via web3 to avoid size limit for creator factory
-    function generateCreatorVault(string memory _name, string memory _symbol, address vault) public returns(address token){
-        // XeldoradoVault cvault_o = new XeldoradoVault(vaultCreator(vault), _name, _symbol);
-        // vault = address(cvault_o);
-        token = IXeldoradoCreatorFactory(xeldoradocreatorfactory).generateCreatorVault(msg.sender, _name, _symbol, vault);
-    }
     
     function creatorToken(address _creator) public view returns(address ctoken){
        ctoken = IXeldoradoCreatorFactory(xeldoradocreatorfactory).creatorToken(_creator);
@@ -140,10 +165,33 @@ contract XeldoradoRoute {
     function creatorFee(address _creator) public view returns(uint cfee) {
         cfee = IXeldoradoCreatorFactory(xeldoradocreatorfactory).creatorFee(_creator);
     }
+
     function allCreators(uint index) public view returns(address creator){
         creator = IXeldoradoCreatorFactory(xeldoradocreatorfactory).allCreators(index);
     }
+
+    function creatorExist(address _creator) public view returns(bool){
+        return IXeldoradoCreatorFactory(xeldoradocreatorfactory).creatorExist(_creator);
+    }
+
+    function newCreator(uint _creatorFee) public {
+        IXeldoradoCreatorFactory(xeldoradocreatorfactory).newCreator(msg.sender, _creatorFee);
+    }
     
+    function updateCreatorFee(uint _creatorFee) public{
+        IXeldoradoCreatorFactory(xeldoradocreatorfactory).updateCreatorFee(msg.sender, _creatorFee);
+    }
+    
+    // Deploy vault contract via web3 to avoid size limit for creator factory
+    function generateCreatorVault(string memory _name, string memory _symbol, address vault) public returns(address token){
+        // XeldoradoVault cvault_o = new XeldoradoVault(vaultCreator(vault), _name, _symbol);
+        // vault = address(cvault_o);
+        token = IXeldoradoCreatorFactory(xeldoradocreatorfactory).generateCreatorVault(msg.sender, _name, _symbol, vault);
+    }
+
+    function syncMigrationContractVoting(address _creator, uint totalTokenHolders) public {
+        IXeldoradoCreatorFactory(xeldoradocreatorfactory).syncMigrationContractVoting(_creator, totalTokenHolders);
+    }
     
     ////////////////////////////////////////
     // ***** Creator Vault functions**** //
@@ -171,6 +219,10 @@ contract XeldoradoRoute {
     
     function vaultIdToTokenId(uint index, address vault) public view returns(uint){
         return IXeldoradoVault(vault).vaultIdToTokenId(index);
+    }
+    
+    function vaultIdTodrirectNFTTrasnfer(uint index, address vault) public view returns(bool){
+        return IXeldoradoVault(vault).vaultIdTodrirectNFTTrasnfer(index);
     }
     
     function allNFTs(address vault) public view returns(uint){
@@ -209,7 +261,6 @@ contract XeldoradoRoute {
         return IXeldoradoVault(vault).ICTOmin();
     }
     
-    
     function addMintedNFTERC(address _nft, uint _tokenId, address vault) public{
         require(msg.sender == vaultCreator(vault), 'Xeldorado: only creator can add new NFTs');
         IXeldoradoVault(vault).addMintedNFTERC(_nft,_tokenId);
@@ -229,20 +280,21 @@ contract XeldoradoRoute {
         return IXeldoradoVault(vault).singleNFTPrice();
     }
     
+    // approve transfaction fee from creator token
     function redeemNFT(uint _vaultId, address vault) public{
         // TransferHelper.safeApprove(vaultToken(vault), vault, singleNFTPrice(vault));
-        IXeldoradoVault(vault).redeemNFT(msg.sender, _vaultId, fee(), feeTo());
+        IXeldoradoVault(vault).redeemNFT(msg.sender, _vaultId);
     }
     
     function ReturnOfRedeemedNFT(uint _vaultId, address vault) public {
         require(msg.sender == IERC721(vaultIdTonftContract(_vaultId,vault)).ownerOf(vaultIdToTokenId(_vaultId,vault)), 'Xeldorado: only NFT owner can return');
         // TransferHelper.safeApprove(vaultIdTonftContract(_vaultId,vault),vault,vaultIdToTokenId(_vaultId,vault));
-        IXeldoradoVault(vault).ReturnOfRedeemedNFT(msg.sender, _vaultId, fee(), feeTo());
+        IXeldoradoVault(vault).ReturnOfRedeemedNFT(msg.sender, _vaultId);
     }
     
     function initializeLiquidityOffering(address _basetoken, uint _minpriceofbasetoken, uint _min, address vault) public {
         require(msg.sender == vaultCreator(vault), 'Xeldorado: only creator can initialize liquidity offering');
-        require(_checkTokenExistsInBaseTokens(_basetoken), 'Xeldorado: must be one of the accepted base tokens');
+        require(checkTokenExistsInBaseTokens(_basetoken), 'Xeldorado: must be one of the accepted base tokens');
         IXeldoradoVault(vault).initializeLiquidityOffering(_basetoken, _minpriceofbasetoken, createPair(vaultToken(vault), _basetoken), _min);
     }
     
@@ -259,7 +311,7 @@ contract XeldoradoRoute {
     function bidCreatorToken(uint _amount, uint _bidpriceofbasetoken, address vault) public{
         // uint totalFees = XeldoradoLibrary1.calculateFee(_amount.mul(_bidpriceofbasetoken)/10**18, fee().mul(10)).add(XeldoradoLibrary1.calculateFee(_amount.mul(_bidpriceofbasetoken)/10**18, creatorFee(vaultCreator(vault))));
         // TransferHelper.safeApprove(vaultBasetoken(vault), vault, (_amount.mul(_bidpriceofbasetoken) / (10**18)).add(totalFees));
-        IXeldoradoVault(vault).bidCreatorToken(msg.sender, _amount, _bidpriceofbasetoken, fee(), creatorFee(vaultCreator(vault)), feeTo());
+        IXeldoradoVault(vault).bidCreatorToken(msg.sender, _amount, _bidpriceofbasetoken);
         // TransferHelper.safeApprove(vaultBasetoken(vault), vault, 0);
     }
     
@@ -298,7 +350,7 @@ contract XeldoradoRoute {
     
     function pairGetReserves(address pair) public view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast){
         return IXeldoradoPair(pair).getReserves();
-        
+
     }
     
     function pairPrice0CumulativeLast(address pair) public view returns (uint){
@@ -333,7 +385,6 @@ contract XeldoradoRoute {
         else {
             require(1==0,"Xeldorado: Shouldn't reach here none of the token is base token");
         }
-        
     }
     
     function pairSync(address pair) public{
@@ -353,6 +404,14 @@ contract XeldoradoRoute {
         return ICreatorVestingVault(_creatorVestingVault).currentCreatorVVBalance();
     }
     
+    function creatorVVRedeemedCreatorBalance(address _creatorVestingVault) public view returns(uint){
+        return ICreatorVestingVault(_creatorVestingVault).redeemedCreatorBalance();
+    }
+    
+    function creatorFLOVVBalance(address _creatorVestingVault) public view returns(uint){
+        return ICreatorVestingVault(_creatorVestingVault).FLOVVBalance();
+    }
+    
     function creatorVVcurrentBalanceUpdate(address _creatorVestingVault) public {
         ICreatorVestingVault(_creatorVestingVault).currentBalanceUpdate();
     }
@@ -364,4 +423,26 @@ contract XeldoradoRoute {
     function creatorVVRedeemedVestedTokens(address _creatorVestingVault, uint _amount) public {
         ICreatorVestingVault(_creatorVestingVault).redeemedVestedTokens(_amount);
     }
+
+    ////////////////////////////////////////
+    // ***** Creator Token functions**** //
+    //////////////////////////////////////
+
+    // not needed since same migration contract for all    
+    // function migrationContract(address ctoken) public view returns(address){
+    //     return ICreatorToken(ctoken).migrationContract();
+    // }
+
+    function voteCount(address ctoken) public view returns(uint){
+        return ICreatorToken(ctoken).voteCount();
+    }
+
+    function votersTokenCount(address ctoken) public view returns(uint){
+        return ICreatorToken(ctoken).votersTokenCount();
+    }
+
+    function migrationContractPassed(address ctoken, uint voterThreshold, uint voterTokenThreshold, uint totalTokenHolders) public view returns(bool){
+        return ICreatorToken(ctoken).migrationContractPassed(voterThreshold, voterTokenThreshold, totalTokenHolders);
+    }
+
 }

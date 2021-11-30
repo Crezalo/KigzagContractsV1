@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
 interface IXeldoradoVault {
@@ -8,7 +8,7 @@ interface IXeldoradoVault {
     event liquidityFillEnded(address _pair);
     event NFTReturned(address owner, uint vaultId);
     event biddingCreatorToken(address _buyer,uint _amount, uint _bidpriceofbasetoken);
-    event migrationVaultRequestCreated();    
+    // event migrationVaultRequestCreated();    
     event migrationVaultRequestApproved(address toContract);
 
     // function admin() external view returns(address);
@@ -34,16 +34,18 @@ interface IXeldoradoVault {
     function addNFTByCreateNewCollection(string memory _tokenURI) external;
     function addNFTByCreateNewCollection_Batch(string[] memory _tokenURI) external;
     function singleNFTPrice() external view returns(uint);
-    function redeemNFT(address _to, uint _vaultId, uint _xfee, address _feeTo) external;
-    function ReturnOfRedeemedNFT(address _to, uint _vaultId, uint _xfee, address _feeTo) external;
+    function redeemNFT(address _to, uint _vaultId) external;
+    function ReturnOfRedeemedNFT(address _to, uint _vaultId) external;
     function initializeLiquidityOffering(address _basetoken, uint _minpriceofbasetoken, address _pair, uint _min) external ;
     function addTokensForFLO(uint amount) external;
     function initializeFurtherLiquidityOffering(uint _min) external ;
     function endLiquidityFilling() external;
-    function bidCreatorToken(address _buyer, uint _amount, uint _bidpriceofbasetoken, uint _xfee, uint _cfee, address _feeTo) external;
+    function bidCreatorToken(address _buyer, uint _amount, uint _bidpriceofbasetoken) external;
     function viewLiquidityFiling() external view returns (uint percent);
+    
+    // although via interface but need particular msg.senders
     function approveDirectNFTTransfer(uint vaultId) external;
     function directTransferNFT(uint _vaultId, address _to) external;
-    function migrateNFTToV2_createRequest() external;
-    function migrationApprove(address toContract) external;
+    // function migrateNFTToV2_createRequest() external;
+    function migrationApprove(address toContract, uint totalTokenHolders) external;
 }

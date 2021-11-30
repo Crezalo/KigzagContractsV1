@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
 interface IXeldoradoPair {
 
     event Swap(address indexed sender, uint amountIn, address tokenIn, uint amountOut, address tokenOut, address indexed to);
     event Sync(uint112 reserve0, uint112 reserve1);
-    event migrationPairRequestCreated();
+    // event migrationPairRequestCreated();
     event migrationPairRequestApproved(address toContract);
 
     function MINIMUM_LIQUIDITY() external pure returns (uint);
@@ -26,7 +26,7 @@ interface IXeldoradoPair {
     // function skim(address to) external;
     function sync() external;
 
-    function initialize(address _token0, address _token1, address _creator, address _factory, address _creatorfactory) external;
-    function migrateLiquidityToV2_createRequest() external;
-    function migrationApprove(address toContract) external;
+    // although via interface but need particular msg.senders
+    // function migrateLiquidityToV2_createRequest() external;
+    function migrationApprove(address toContract, uint totalTokenHolders) external;
 }
