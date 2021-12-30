@@ -32,9 +32,16 @@ Open source implementation of Xeldorado - A general purpose Creator Social Token
     - [x] Airdrops, before CreatorToken launch as it is, after launch with voting and approval 
     - [x] FLO proposals to increase size of market to ensure greater liquidity in Pair contract
     - [x] Allowances Proposals to decide amount allocated per manager. Single proposal can handle multiple managers' allowances.
-    - [x] General Proposal will contain link to their community in maybe discord. Result of these proposal will be acted upon by community in good faith
+    - [x] General Proposal will contain link to their DAO Forum's proposal page where detailed discussions can take place. Results of these proposals will be acted upon by community members in good faith.
   - [x] Token holders can vote for each of the proposal
   - [x] Result of voting is based on number of CreatorTokens held by the voter. For first 3 cases only 2 choices, no or yes. For General Proposal any number of choices are allowed. 
+- [x] Migration to V2: 
+  - [x] Pair, DAO, Vault and Bank contracts contains Token and NFT assets which is transfered via Migration Contract to V2 version of Pair, DAO, Vault and Bank contracts
+  - [x] Before migration of a Creator Community's assets, community members must vote for or against mirgration and migration contract will be made public much in advance. Voting is implemented in CreatorToken contract. This is done to ensure security of assets and decentralisation of decision making. This is important since in Xeldorado Protocol liquidity isn't rented its owned.
+  - [x] If voted no, then assets will stay in V1, current version, of Xeldorado Protocol
+  - [x] There can be 2 types of migration, partial and complete. In partial migration only one or two parts maybe updated like only Vault contract updated and hence needs asset transfer only for Vault's V2 version. In full migration all 4 contracts will be updated and maybe entire Factory and CreatorFactory may also be updated. 
+  - [x] Migration function in Pair, DAO, Vault and Bank are implemented with check on voting status passed and only after that migration contract, that has been voted, is allowed to transfer asset by deploying V2 version of the contract.
+  - [x] Migration function also updates all dependent contracts with new address of V2 contract. For e.g. if Vault contract gets migrated to V2,then its dependent contract CreatorToken, CreatorNFT, CreatorDAO and CreatorFactory will get updated with V2 address of vault variable.
 - [ ] Creator Bank( Not needed on day one, can be integrated after launch)
   - [ ] Bank contract needs price data from CreatorToken to decide upon interest rates. Hence, Each creator can have different interest rates
   - [ ] Community members, holders of CreatorToken can stake their CreatorTokens for some yield
