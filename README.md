@@ -19,7 +19,8 @@ Open source implementation of Xeldorado - A general purpose Creator Social Token
   - [x] Holder of CreatorTokens can redeem NFT and tokens worth NFT price will be burnt from his wallet [batch supported]
   - [x] Holder of CreatorTokens can return his redeemed NFT and tokens worth NFT price will be minted to his wallet [batch supported]
   - [x] 2 NFTs of a creator can be swapped for no fees [batch supported]
-  - [x] Creator/Community can add further liquidity to Pair Contract by sale of CreatorTokens from DAO contract
+  - [x] Creator/Community can add Further Liquidity to Pair Contract by sale of CreatorTokens from DAO contract. Vault Contract hosts this sale.
+  - [x] Vault can own millions of NFTs. There are no arrays storing Vault's NFT data about redeemed NFTs. Instead a simple mapping of vaultId to NFT Contract and vaultId to TokenId is used and to know whether an NFT is redeemed a simple ownerOf() function call for a given vaultId will help determine. This is done to avoid For Loops over large arrays which will run out of gas after few thousand NFTs. Hence avoiding scaling bottleneck.
 - [x] Creator Pair
   - [x] Constant Product based AMM for CreatorToken - BaseToken pair
   - [x] Swap between tokens
