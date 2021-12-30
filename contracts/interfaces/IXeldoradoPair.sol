@@ -2,14 +2,12 @@
 pragma solidity ^0.8.4;
 
 interface IXeldoradoPair {
-
     event Swap(address indexed sender, uint amountIn, address tokenIn, uint amountOut, address tokenOut, address indexed to);
     event Sync(uint112 reserve0, uint112 reserve1);
     // event migrationPairRequestCreated();
-    event migrationPairRequestApproved(address toContract);
+    event migrationPairCompleted(address toContract);
 
     function MINIMUM_LIQUIDITY() external pure returns (uint);
-    function admin() external view returns (address);
     function token0() external view returns (address);
     function token1() external view returns (address);
     function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
@@ -26,7 +24,6 @@ interface IXeldoradoPair {
     // function skim(address to) external;
     function sync() external;
 
-    // although via interface but need particular msg.senders
-    // function migrateLiquidityToV2_createRequest() external;
-    function migrationApprove(address toContract, uint totalTokenHolders) external;
+    // only migration contract can call
+    function migratePair(address toContract) external;
 }

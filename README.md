@@ -1,13 +1,61 @@
 # [Xeldorado Protocol](nft.xeldorado.live)
-Open source implementation of Xeldorado Protocol - The NFT DEX. It contains smart contracts for Xeldorado Protocol : Xeldorado Factory and Route.
+Open source implementation of Xeldorado - A general purpose Creator Social Token (CST) Protocol that implements Creator Economy by connecting Creator Tokens with:
+- <b>Liquidity Pair of CreatorToken-BaseToken</b> : Gateway between Creator Economy and External World. Creator can choose from a list of options to select best suited BaseToken. For e.g. USDC, DAI, WETH, WBTC, BUSD, etc. 
+- <b>NFTs that are pegged to CreatorToken</b> : Price of 1 NFT will be constant w.r.t. CreatorToken and every time a new NFT is added to the vault same number of CreatorTokens will be minted to enuse the peg. 
+- <b>Bank</b> : for NFT backed lending borrowing of Creator Tokens
+- <b>DAO</b> : for Creator community governance
+
+## Smart Contracts Flow Diagram
+
+![Samrt Contract Flow Diagram](./Images/XeldoradoCoreSmartContractDesign.png)
+
+## Features 
+
+- [x] Creator Vault
+  - [x] Creator Add/Mint NFTs to vault contract
+  - [x] Launch Creator Token, make it available for community to buy. Liquidity is bought not rented. Since CreatorTokens offer NFT, DAO, Banking related utilities they do have value since day one of launch especially to access Vault NFTs.
+  - [x] Price of NFTs is pegged to certain number of tokens at the time of launch and stays same forever so scope of rise in NFT prise is only from rise in token price of CreatorToken
+  - [x] Same number of tokens are minted every time an NFT is added to vault, these tokens are transferred to DAO contract and can be used for Airdrop, FLO, Grants for community [batch supported]
+  - [x] Holder of CreatorTokens can redeem NFT and tokens worth NFT price will be burnt from his wallet [batch supported]
+  - [x] Holder of CreatorTokens can return his redeemed NFT and tokens worth NFT price will be minted to his wallet [batch supported]
+  - [x] 2 NFTs of a creator can be swapped for no fees [batch supported]
+  - [x] Creator/Community can add further liquidity to Pair Contract by sale of CreatorTokens from DAO contract
+- [x] Creator Pair
+  - [x] Constant Product based AMM for CreatorToken - BaseToken pair
+  - [x] Swap between tokens
+- [x] Creator Vesting Vault
+  - [x] Tokens allocated to creator at the start are vested over a period of time, 2 years by default with 3 months of cliff period during which the vested token count will be increasing just that creator cannot redeem them due to cliff.
+- [x] Creator DAO  
+  - [x] Token holders can make proposals 
+  - [x] Creator can choose managers and those managers will be given allowances. Using these allowances they can pay folks/employees, they hire, for specific task either on Pay Per Task basis or monthly salaries. Managers can transfer from their allowances to the employee's allowance value. 
+  - [x] 4 types of proposals 
+    - [x] Airdrops, before CreatorToken launch as it is, after launch with voting and approval 
+    - [x] FLO proposals to increase size of market to ensure greater liquidity in Pair contract
+    - [x] Allowances Proposals to decide amount allocated per manager. Single proposal can handle multiple managers' allowances.
+    - [x] General Proposal will contain link to their community in maybe discord. Result of these proposal will be acted upon by community in good faith
+  - [x] Token holders can vote for each of the proposal
+  - [x] Result of voting is based on number of CreatorTokens held by the voter. For first 3 cases only 2 choices, no or yes. For General Proposal any number of choices are allowed. 
+- [ ] Creator Bank( Not needed on day one, can be integrated after launch)
+  - [ ] Bank contract needs price data from CreatorToken to decide upon interest rates. Hence, Each creator can have different interest rates
+  - [ ] Community members, holders of CreatorToken can stake their CreatorTokens for some yield
+  - [ ] NFT Loans: Holder of NFTs from Creator Vault can use it as collateral for borrowing CreatorTokens, since we have price data of CreatorTokens and also price of single NFT is fixed w.r.t. to CreatorToken we can estimate realistic valuation of NFTs
+  - [ ] Flash Loans on Creator Tokens 
+- [ ] External Contract Functions
+  - [ ] 2 NFTs of different creator with same BaseTokens can be swapped with small fees 
+  - [ ] If someone owns an NFT, you can buy it for premium by placing a bid (Auction smart contract will be placed separately) 
+  - [ ] Base Token Pairs: Use a Curve kind of multi token pairs for BaseTokens for swap. This will help NFTs of creator that don't have same base token. Liquidity will be added by us using a small fraction of profit being earnt in BaseTokens. Swap in these pools will have no fees. 
 
 ## Documentation
 
-What we do: [Understand](https://nft.xeldorado.live/index.html#xeldoradoprotocol)
+Detailed Explanations for each contracts and functions: [Understand](https://nft.xeldorado.live/index.html#xeldoradoprotocol)
 
 <!-- <a href="https://nft.xeldorado.live/index.html#xeldoradoprotocol" target="_blank"><img src="https://nft.xeldorado.live/images/logo.png" width="150" height="30"/></a> -->
 
 White paper for Xeldorado Protocol is currently under development.
+
+## Tests
+
+For tests please refer to [`README`](./test/README.md) from test folder.
 
 ## Licensing
 
@@ -31,8 +79,8 @@ The primary license for Xeldorado Contracts V1 is the Business Source License 1.
 
 <a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://nft.xeldorado.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
 <a href="https://t.me/xeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://twitter.com/RealXeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://www.reddit.com/r/Xeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/reddit.png" width="80" height="80"/></a>
+<a href="https://twitter.com/XeldoradoLabs" target="_blank"><img src="https://nft.xeldorado.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://www.reddit.com/r/Xeldorado_/" target="_blank"><img src="https://nft.xeldorado.live/images/reddit.png" width="80" height="80"/></a>
 
 ## Responsible disclosure
 
@@ -68,4 +116,8 @@ We will promise the following:
 
 ## Remarks
 
-Currently we won't be having any exchange token but the core contract has support for discounted fees based on the number of exchange tokens owned. This is done to ensure smooth future integration of exchange token next year after our protocol gains some traction.
+- Currently,
+    - we won't be having any exchange token but the core contract has support for discounted fees based on the number of exchange tokens owned. This is done to ensure smooth future integration of exchange token next year after our protocol gains some traction.
+    - we haven't implemented the logic for creator's bank contract. There must be some buffer between Creator Token launch and starting of Bank to mitigate risk and establish real valuations for NFTs as well as Creator Tokens which is much needed for using them as collateral for lending borrowing. However The intigration will require only deploying of Bank contract by creator and updating creatorBank value in XeldoraroCreatorFactory contract.
+
+

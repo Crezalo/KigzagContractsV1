@@ -11,7 +11,7 @@ contract CreatorVestingVault is ICreatorVestingVault {
     
     uint public override initialCreatorVVBalance;
     uint public override currentCreatorVVBalance;
-    uint public override FLOVVBalance;
+    // uint public override FLOVVBalance;
     uint public override redeemedCreatorBalance;
     uint private startTimeStamp;
     address public override ctoken;
@@ -38,7 +38,7 @@ contract CreatorVestingVault is ICreatorVestingVault {
         vault = _vault;
     }
     
-    function initialize(address _ctoken, address _creator, uint _duration) public override lock {
+    function initialize(address _ctoken, address _creator, uint _duration) public virtual override lock {
         require(isInitialised==0,'Xeldorado: already isInitialised');
         require(msg.sender==vault,'Xeldorado: only vault allowed');
         isInitialised = 1;
@@ -49,13 +49,25 @@ contract CreatorVestingVault is ICreatorVestingVault {
         initialCreatorVVBalance = IERC20X(ctoken).balanceOf(address(this));
         currentCreatorVVBalance = initialCreatorVVBalance;
         redeemedCreatorBalance = 0;
-        FLOVVBalance = 0;
+        // FLOVVBalance = 0;
     }
+
+    // function updateVaultAddress(address _newVaut) public virtual override {
+    //     require(msg.sender==vault, 'Xeldorado: only vault can update');
+    //     vault=_newVaut;
+    // }
+
+    // function addFLOBalanceToVault(uint amount) public virtual override lock {
+    //     require(msg.sender==vault,'Xeldorado: only vault allowed');
+    //     require(amount<=FLOVVBalance,'Xeldorado: not adequate FLO balance');
+    //     IERC20X(ctoken).transfer(vault,amount);
+    //     currentBalanceUpdate();
+    //     emit FLOAmountAdded(creator, ctoken, amount);
+    // }
     
-    function currentBalanceUpdate() public override lock {
-        // uint totalBalance = IERC20X(ctoken).balanceOf(address(this));
+    function currentBalanceUpdate() public virtual override {
         currentCreatorVVBalance = initialCreatorVVBalance.sub(redeemedCreatorBalance);
-        FLOVVBalance = IERC20X(ctoken).balanceOf(address(this)).sub(currentCreatorVVBalance);
+        // FLOVVBalance = IERC20X(ctoken).balanceOf(address(this)).sub(currentCreatorVVBalance);
     }
     
     
@@ -65,20 +77,12 @@ contract CreatorVestingVault is ICreatorVestingVault {
     }
     
     // in proportion to time passed since start of ICTO, amount from vesting vault can be redeemed by the creator
-    function redeemedVestedTokens(uint amount) public override lock {
+    function redeemedVestedTokens(uint amount) public virtual override lock {
         require((block.timestamp.sub(startTimeStamp)).mul(IXeldoradoFactory(factory).vestingCliffInt()).div(duration) > 1 , 'Xeldorado: cliff hanger period');
         require(amount<= currentCreatorVVBalance.sub(minimumCreatorBalance()),'Xeldorado: vesting limit reached');
         redeemedCreatorBalance += amount;
         IERC20X(ctoken).transfer(creator,amount);
         currentBalanceUpdate();
         emit AmountVested(creator, ctoken, amount);
-    }
-
-    function addFLOBalanceToVault(uint amount) public override lock {
-        require(msg.sender==vault,'Xeldorado: only vault allowed');
-        require(amount<=FLOVVBalance,'Xeldorado: not adequate FLO balance');
-        IERC20X(ctoken).transfer(vault,amount);
-        currentBalanceUpdate();
-        emit FLOAmountAdded(creator, ctoken, amount);
     }
 }

@@ -5,17 +5,22 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
+import './interfaces/ICreatorNFT.sol';
 
-contract CreatorNFT is ERC721URIStorage {
+
+contract CreatorNFT is ERC721URIStorage, ICreatorNFT {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-    address public creator;
+    address public override creator;
+    address vault;
     
     constructor(address _creator, string memory _name, string memory _symbol) ERC721(_name, _symbol){
         creator = _creator;
+        vault = msg.sender;
     }   
 
-    function createToken(string memory tokenURI,address _vault) public returns (uint){
+    function createToken(string memory tokenURI,address _vault) public virtual override returns (uint){
+        require(msg.sender==vault,'Xeldorado: only vault can create tokens');
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         
@@ -24,13 +29,20 @@ contract CreatorNFT is ERC721URIStorage {
         return newItemId;
     }
     
-    function createBatchToken(string[] memory tokenURI, address _vault) public returns(uint start, uint end){
+    function createBatchToken(string[] memory tokenURI, address _vault) public virtual override returns(uint start, uint end){
+        require(msg.sender==vault,'Xeldorado: only vault can ctreate tokens');
         start = _tokenIds.current() + 1;
-        for(uint i=0;i<tokenURI.length;i++){
+        for(uint i;i<tokenURI.length;i++){
             _tokenIds.increment();
             _mint(_vault, _tokenIds.current());
             _setTokenURI(_tokenIds.current(),tokenURI[i]);
         }
         end = _tokenIds.current();
+    }
+
+    // will be called during migration via vault
+    function updateVaultAddress(address _newVaut) public virtual override{
+        require(msg.sender==vault,'Xeldorado: only vault can update');
+        vault = _newVaut;
     }
 }

@@ -10,13 +10,19 @@ interface ICreatorToken is IERC20 {
     event migrationContractVoted(address migrationContract, address ctoken, address voter, bool vote);
 
     function migrationContract() external view returns(address);
-    function voteCount() external view returns(uint);
-    function votersTokenCount() external view returns(uint);
-    function migrationContractPassed(uint voterThreshold, uint voterTokenThreshold, uint totalTokenHolders) external view returns(bool);
+    function creator() external view returns(address);
+    function voteCount(uint) external view returns(uint);
+    function votersTokenCount(uint) external view returns(uint);
+    function votingPhase() external view returns(uint);
+    function migrationContractPassed() external view returns(bool);
 
-    function burnTokens(address _of, uint _amount) external; // only vault allowed
-    function burnMyTokens(uint _amount) external; // to be called directly from address whose token has to be burnt
-    function mintTokens(address _to, uint _amount) external; // only vault allowed
+    // only vault can call
+    function burnTokens(address _of, uint _amount) external; 
+    function mintTokens(address _to, uint _amount) external; 
+    function updateVaultAddress(address _vault) external;
+
+    // caller's token will be burnt
+    function burnMyTokens(uint _amount) external;
 
     // need to be started by creator or any of the token holders
     function migrationContractVotingInitialise(address _migrationContract) external;
@@ -24,6 +30,6 @@ interface ICreatorToken is IERC20 {
     // need to be called directly by the voters
     function migrationContractVote(bool vote) external;
 
-    // only creator factory can access
-    function migrationVotingStatusSync(uint voterThreshold, uint voterTokenThreshold, uint totalTokenHolders, uint duration) external;
+    // only creator factory can call
+    function migrationVotingStatusSync(uint duration) external;
 }

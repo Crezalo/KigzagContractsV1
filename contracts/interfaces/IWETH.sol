@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.4;
 
+// used as dummy base token for testing purpose
 interface IWETH {
     function deposit() external payable;
     function transfer(address to, uint value) external returns (bool);
