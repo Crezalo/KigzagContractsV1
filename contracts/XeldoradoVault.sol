@@ -339,7 +339,7 @@ contract XeldoradoVault is IXeldoradoVault{
     }
     
     function endLiquidityFilling() public virtual override {
-        if((block.timestamp.sub(liquidityFillStartTime)).div(ICTOduration) > 1){
+        if((block.timestamp.sub(liquidityFillStartTime)).div(ICTOduration) > 1 || viewLiquidityFiling() == 10000){
             if(startliquidfill>3) require(IERC20X(token).transfer(pair, FLOBalance.sub(IERC20X(token).balanceOf(address(this)))),'Xeldorado: creator token transfer to Pair failed');
             else require(IERC20X(token).transfer(pair, initialBalance.sub(IERC20X(token).balanceOf(address(this)))),'Xeldorado: transfer 3 failed');
             require(IERC20X(token).transfer(creatorDAO, IERC20X(token).balanceOf(address(this))),'Xeldorado: transfer 4 failed');
