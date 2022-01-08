@@ -1,5 +1,5 @@
 # [Xeldorado Protocol](nft.xeldorado.live)
-### Xeldorado - A general purpose Creator Social Token(CST) Protocol that implements Creator Economy using:
+### Xeldorado - A general purpose Creator Social Token (CST) Protocol that implements Creator Economy using:
 #### 1. Growth Tokens
   Creator/Community Social Tokens that offer potential increase in price as Creator/Community grows. Growth Tokens are superior version of Loyalty Tokens. They are traded with AMM and offers:
    - <b>Liquidity Pair of CreatorToken-BaseToken</b> : Gateway between Creator Economy and External World. Creator can choose from a list of options to select best suited BaseToken. For e.g. USDC, DAI, WETH, WBTC, BUSD, etc. 
@@ -17,12 +17,7 @@
    - <b>NFT Sale against Creator Token</b> : Creator or community can decide upon price of NFT in creator tokens and list it for sale. 
 
    - <b>DAO</b> : for Creator community governance. Handles community treasury.
-
-
-## Smart Contracts Flow Diagram
-
-![Samrt Contract Flow Diagram](./Images/XeldoradoCoreSmartContractDesign.png)
-
+<hr/>
 ## Features 
 
 ### 1. Growth Tokens
@@ -49,7 +44,7 @@
   - [x] Creator can choose managers and those managers will be given allowances. Using these allowances they can pay folks/employees, they hire, for specific task either on Pay Per Task basis or monthly salaries. Managers can transfer from their allowances to the employee's allowance value. 
   - [x] 4 types of proposals 
     - [x] Airdrops, before CreatorToken launch as it is, after launch with voting and approval 
-    - [x] FLO proposals to increase size of market to ensure greater liquidity in Pair contract
+    - [x] Further LIquidity Offering (FLO) proposals to increase size of market to ensure greater liquidity in Pair contract
     - [x] Allowances Proposals to decide amount allocated per manager. Single proposal can handle multiple managers' allowances.
     - [x] General Proposal will contain link to their DAO Forum's proposal page where detailed discussions can take place. Results of these proposals will be acted upon by community members in good faith.
   - [x] Token holders can vote for each of the proposal
@@ -73,12 +68,13 @@
   - [ ] 2 NFTs of different creator with same BaseTokens can be swapped with small fees 
   - [ ] If someone owns an NFT, you can buy it for premium by placing a bid (Auction smart contract will be placed separately) 
   - [ ] Base Token Pairs: Use a Curve kind of multi token pairs for BaseTokens for swap. This will help NFTs of creator that don't have same base token. Liquidity will be added by us using a small fraction of profit being earnt in BaseTokens. Swap in these pools will have no fees. 
+<hr/>
 
 ### 1. Loyalty Tokens
 - [x] <b>Creator Token</b>
   - [x] Buy Tokens at a price fixed by Creator/Community. The Base Token received are send to DAO contract which handles treasury.
 
-- [x] <b>DAO Token</b>
+- [x] <b>Creator DAO</b>
   - [x] Token holders can make proposals 
   - [x] Creator/Community can airdrop Creator Tokens to any account since these tokens cannot be sold and only be used to access premium stuff no need risks of price drop involded.
   - [x] Creator/Community can add managers and those managers will be given allowances in Base Tokens. Using these allowances they can pay folks/employees, they hire, for specific task either on Pay Per Task basis or monthly salaries. Managers can transfer from their allowances to the employee's allowance value. 
@@ -87,14 +83,25 @@
     - [x] General Proposal will contain link to their DAO Forum's proposal page where detailed discussions can take place. Results of these proposals will be acted upon by community members in good faith.
   - [x] Token holders can vote for each of the proposal
   - [x] Result of voting is based on number of CreatorTokens held by the voter. For first case only 2 choices, no or yes. For General Proposal any number of choices are allowed. 
+  
+- [x] <b>Creator Vault</b>
+  - [x] Creator/Community can add NFTs to vault. Further list it for Sale at before mentioned price.
+  - [x] NFTs are sold for Creator Tokens which can be burnt since they are only a form of voucher/tickets.
+
+## Smart Contracts Flow Diagram
+
+#### 1. Growth Tokens
+![Samrt Contract Flow Diagram](./Images/XeldoradoCoreSmartContractDesign.png)
+#### 1. Loyalty Tokens
+![Samrt Contract Flow Diagram](./Images/XeldoradoCoreSmartContractDesign_LT.png)
 
 ## Documentation
 
-Detailed Explanations for each contracts and functions: [Understand](https://nft.xeldorado.live/index.html#xeldoradoprotocol)
+Visual Explanations for protocol: [Understand](https://nft.xeldorado.live/index.html#xeldoradoprotocol)
 
 <!-- <a href="https://nft.xeldorado.live/index.html#xeldoradoprotocol" target="_blank"><img src="https://nft.xeldorado.live/images/logo.png" width="150" height="30"/></a> -->
 
-White paper for Xeldorado Protocol is currently under development.
+White paper & Docs for Xeldorado Protocol is currently under development.
 
 ## Tests
 
