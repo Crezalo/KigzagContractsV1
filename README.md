@@ -20,8 +20,6 @@
 
 Creator/Community can decide to opt for anyone of them.
 
-<hr/>
-
 ## Features 
 
 ### 1. Growth Tokens
