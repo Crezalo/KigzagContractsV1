@@ -93,7 +93,9 @@
 
 #### 1. Growth Tokens
 ![Samrt Contract Flow Diagram](./Images/XeldoradoCoreSmartContractDesign.png)
-#### 1. Loyalty Tokens
+<hr/>
+
+#### 2. Loyalty Tokens
 ![Samrt Contract Flow Diagram](./Images/XeldoradoCoreSmartContractDesign_LT.png)
 
 ## Documentation
