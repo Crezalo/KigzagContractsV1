@@ -18,6 +18,7 @@
 
    - <b>DAO</b> : for Creator community governance. Handles community treasury.
 <hr/>
+
 ## Features 
 
 ### 1. Growth Tokens
