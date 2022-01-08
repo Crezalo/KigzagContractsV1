@@ -1,6 +1,6 @@
 # [Xeldorado Protocol](nft.xeldorado.live)
-###Xeldorado - A general purpose Creator Social Token(CST) Protocol that implements Creator Economy using:
-1. #### Growth Tokens
+### Xeldorado - A general purpose Creator Social Token(CST) Protocol that implements Creator Economy using:
+#### 1. Growth Tokens
   Creator/Community Social Tokens that offer potential increase in price as Creator/Community grows. Growth Tokens are superior version of Loyalty Tokens. They are traded with AMM and offers:
    - <b>Liquidity Pair of CreatorToken-BaseToken</b> : Gateway between Creator Economy and External World. Creator can choose from a list of options to select best suited BaseToken. For e.g. USDC, DAI, WETH, WBTC, BUSD, etc. 
   <br/>
@@ -10,7 +10,7 @@
   <br/>
    - <b>DAO</b> : for Creator community governance. Handles community treasury.
   
-2. #### Loyalty Tokens
+#### 2. Loyalty Tokens
   Creator tokens that are sold to offer access to premium stuff from creator. It could be exclusive video content, one-on-one, merchandise, or in real world like access to front row seats of Creator's show (if creator is a musician or comedian). It is limited only to creator's imagination. 
    - <b>Creator Tokens</b> : fans and followers can buy creator tokens at price fixed by creator or community. These tokens should be treated as vouchers or tickets which can be bought but one cannot sell them back directly. A creator can choose to create subscription by deducting some tokens from holder on regular basis.
   <br/>
