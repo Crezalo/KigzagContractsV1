@@ -17,6 +17,9 @@
    - <b>NFT Sale against Creator Token</b> : Creator or community can decide upon price of NFT in creator tokens and list it for sale. 
 
    - <b>DAO</b> : for Creator community governance. Handles community treasury.
+
+Creator/Community can decide to opt for anyone of them.
+
 <hr/>
 
 ## Features 
