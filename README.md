@@ -1,4 +1,4 @@
-# [Xeldorado Protocol](nft.xeldorado.live)
+# [Xeldorado Protocol](https://nft.xeldorado.live/)
 ### Xeldorado - A general purpose Creator Social Token (CST) Protocol that implements Creator Economy using:
 #### 1. Growth Tokens
   Creator/Community Social Tokens that offer potential increase in price as Creator/Community grows. Growth Tokens are superior version of Loyalty Tokens. They are traded with in-house AMM and offers:
