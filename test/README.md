@@ -1,4 +1,4 @@
-# Smart Contract Address
+# Smart Contract Address 
 
 1. Deployer 
    - Factory 
@@ -15,8 +15,10 @@
 5. Migration Contract 
 6. Creator Admins: multiple addresses 
 
+
 # Process to test E2E contracts manually: (Ak-> Address at index k from above) 
 
+### 1. Growth Tokens
 We will divide it into 3 phases
 
 ## Phase 1: Initialization 
