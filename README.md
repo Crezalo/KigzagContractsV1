@@ -1,9 +1,23 @@
 # [Xeldorado Protocol](nft.xeldorado.live)
-Open source implementation of Xeldorado - A general purpose Creator Social Token (CST) Protocol that implements Creator Economy by connecting Creator Tokens with:
-- <b>Liquidity Pair of CreatorToken-BaseToken</b> : Gateway between Creator Economy and External World. Creator can choose from a list of options to select best suited BaseToken. For e.g. USDC, DAI, WETH, WBTC, BUSD, etc. 
-- <b>NFTs that are pegged to CreatorToken</b> : Price of 1 NFT will be constant w.r.t. CreatorToken and every time a new NFT is added to the vault same number of CreatorTokens will be minted to enuse the peg. 
-- <b>Bank</b> : for NFT backed lending borrowing of Creator Tokens
-- <b>DAO</b> : for Creator community governance
+###Xeldorado - A general purpose Creator Social Token(CST) Protocol that implements Creator Economy using:
+1. #### Growth Tokens
+  Creator/Community Social Tokens that offer potential increase in price as Creator/Community grows. Growth Tokens are superior version of Loyalty Tokens. They are traded with AMM and offers:
+   - <b>Liquidity Pair of CreatorToken-BaseToken</b> : Gateway between Creator Economy and External World. Creator can choose from a list of options to select best suited BaseToken. For e.g. USDC, DAI, WETH, WBTC, BUSD, etc. 
+  <br/>
+   - <b>NFTs that are pegged to CreatorToken</b> : Price of 1 NFT will be constant w.r.t. CreatorToken and every time a new NFT is added to the vault same number of CreatorTokens will be minted to ensure the peg. Price of NFT soars when Creator Tokens soars w.r.t. Base Tokens. Secondary Market for NFT allows price to soar further but the ceiling price of NFTs stay constant w.r.t. Creator Tokens.
+  <br/>
+   - <b>Bank</b> : for NFT backed lending borrowing of Creator Tokens
+  <br/>
+   - <b>DAO</b> : for Creator community governance. Handles community treasury.
+  
+2. #### Loyalty Tokens
+  Creator tokens that are sold to offer access to premium stuff from creator. It could be exclusive video content, one-on-one, merchandise, or in real world like access to front row seats of Creator's show (if creator is a musician or comedian). It is limited only to creator's imagination. 
+   - <b>Creator Tokens</b> : fans and followers can buy creator tokens at price fixed by creator or community. These tokens should be treated as vouchers or tickets which can be bought but one cannot sell them back directly. A creator can choose to create subscription by deducting some tokens from holder on regular basis.
+  <br/>
+   - <b>NFT Sale against Creator Token</b> : Creator or community can decide upon price of NFT in creator tokens and list it for sale. 
+  <br/>
+   - <b>DAO</b> : for Creator community governance. Handles community treasury.
+
 
 ## Smart Contracts Flow Diagram
 
@@ -11,7 +25,8 @@ Open source implementation of Xeldorado - A general purpose Creator Social Token
 
 ## Features 
 
-- [x] Creator Vault
+### 1. Growth Tokens
+- [x] <b>Creator Vault</b>
   - [x] Creator Add/Mint NFTs to vault contract
   - [x] Launch Creator Token, make it available for community to buy. Liquidity is bought not rented. Since CreatorTokens offer NFT, DAO, Banking related utilities they do have value since day one of launch especially to access Vault NFTs.
   - [x] Price of NFTs is pegged to certain number of tokens at the time of launch and stays same forever so scope of rise in NFT prise is only from rise in token price of CreatorToken
@@ -21,12 +36,15 @@ Open source implementation of Xeldorado - A general purpose Creator Social Token
   - [x] 2 NFTs of a creator can be swapped for no fees [batch supported]
   - [x] Creator/Community can add Further Liquidity to Pair Contract by sale of CreatorTokens from DAO contract. Vault Contract hosts this sale.
   - [x] Vault can own millions of NFTs. There are no arrays storing Vault's NFT data about redeemed NFTs. Instead a simple mapping of vaultId to NFT Contract and vaultId to TokenId is used and to know whether an NFT is redeemed a simple ownerOf() function call for a given vaultId will help determine. This is done to avoid For Loops over large arrays which will run out of gas after few thousand NFTs. Hence avoiding scaling bottleneck.
-- [x] Creator Pair
+  <br/>
+- [x] <b>Creator Pair</b>
   - [x] Constant Product based AMM for CreatorToken - BaseToken pair
   - [x] Swap between tokens
-- [x] Creator Vesting Vault
+  <br/>
+- [x] <b>Creator Vesting Vault</b>
   - [x] Tokens allocated to creator at the start are vested over a period of time, 2 years by default with 3 months of cliff period during which the vested token count will be increasing just that creator cannot redeem them due to cliff.
-- [x] Creator DAO  
+  <br/>
+- [x] <b>Creator DAO</b>
   - [x] Token holders can make proposals 
   - [x] Creator can choose managers and those managers will be given allowances. Using these allowances they can pay folks/employees, they hire, for specific task either on Pay Per Task basis or monthly salaries. Managers can transfer from their allowances to the employee's allowance value. 
   - [x] 4 types of proposals 
@@ -36,22 +54,39 @@ Open source implementation of Xeldorado - A general purpose Creator Social Token
     - [x] General Proposal will contain link to their DAO Forum's proposal page where detailed discussions can take place. Results of these proposals will be acted upon by community members in good faith.
   - [x] Token holders can vote for each of the proposal
   - [x] Result of voting is based on number of CreatorTokens held by the voter. For first 3 cases only 2 choices, no or yes. For General Proposal any number of choices are allowed. 
-- [x] Migration to V2: 
+  <br/>
+- [x] <b>Migration to V2</b> 
   - [x] Pair, DAO, Vault and Bank contracts contains Token and NFT assets which is transfered via Migration Contract to V2 version of Pair, DAO, Vault and Bank contracts
   - [x] Before migration of a Creator Community's assets, community members must vote for or against mirgration and migration contract will be made public much in advance. Voting is implemented in CreatorToken contract. This is done to ensure security of assets and decentralisation of decision making. This is important since in Xeldorado Protocol liquidity isn't rented its owned.
   - [x] If voted no, then assets will stay in V1, current version, of Xeldorado Protocol
   - [x] There can be 2 types of migration, partial and complete. In partial migration only one or two parts maybe updated like only Vault contract updated and hence needs asset transfer only for Vault's V2 version. In full migration all 4 contracts will be updated and maybe entire Factory and CreatorFactory may also be updated. 
   - [x] Migration function in Pair, DAO, Vault and Bank are implemented with check on voting status passed and only after that migration contract, that has been voted, is allowed to transfer asset by deploying V2 version of the contract.
   - [x] Migration function also updates all dependent contracts with new address of V2 contract. For e.g. if Vault contract gets migrated to V2,then its dependent contract CreatorToken, CreatorNFT, CreatorDAO and CreatorFactory will get updated with V2 address of vault variable.
-- [ ] Creator Bank (Not needed on day one, can be integrated after launch)
+  <br/>
+- [ ] <b>Creator Bank (Not needed on day one, can be integrated after launch)</b>
   - [ ] Bank contract needs price data from CreatorToken to decide upon interest rates. Hence, Each creator can have different interest rates
   - [ ] Community members, holders of CreatorToken can stake their CreatorTokens for some yield
   - [ ] NFT Loans: Holder of NFTs from Creator Vault can use it as collateral for borrowing CreatorTokens, since we have price data of CreatorTokens and also price of single NFT is fixed w.r.t. to CreatorToken we can estimate realistic valuation of NFTs
   - [ ] Flash Loans on Creator Tokens 
-- [ ] External Contract Functions
+  <br/>
+- [ ] <b>External Contract Functions</b>
   - [ ] 2 NFTs of different creator with same BaseTokens can be swapped with small fees 
   - [ ] If someone owns an NFT, you can buy it for premium by placing a bid (Auction smart contract will be placed separately) 
   - [ ] Base Token Pairs: Use a Curve kind of multi token pairs for BaseTokens for swap. This will help NFTs of creator that don't have same base token. Liquidity will be added by us using a small fraction of profit being earnt in BaseTokens. Swap in these pools will have no fees. 
+
+### 1. Loyalty Tokens
+- [x] <b>Creator Token</b>
+  - [x] Buy Tokens at a price fixed by Creator/Community. The Base Token received are send to DAO contract which handles treasury.
+  <br/>
+- [x] <b>DAO Token</b>
+  - [x] Token holders can make proposals 
+  - [x] Creator/Community can airdrop Creator Tokens to any account since these tokens cannot be sold and only be used to access premium stuff no need risks of price drop involded.
+  - [x] Creator/Community can add managers and those managers will be given allowances in Base Tokens. Using these allowances they can pay folks/employees, they hire, for specific task either on Pay Per Task basis or monthly salaries. Managers can transfer from their allowances to the employee's allowance value. 
+  - [x] 2 types of proposals 
+    - [x] Allowances Proposals to decide amount allocated per manager. Single proposal can handle multiple managers' allowances.
+    - [x] General Proposal will contain link to their DAO Forum's proposal page where detailed discussions can take place. Results of these proposals will be acted upon by community members in good faith.
+  - [x] Token holders can vote for each of the proposal
+  - [x] Result of voting is based on number of CreatorTokens held by the voter. For first case only 2 choices, no or yes. For General Proposal any number of choices are allowed. 
 
 ## Documentation
 
