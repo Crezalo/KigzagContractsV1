@@ -1,4 +1,4 @@
-# [Xeldorado Protocol](https://nft.xeldorado.live/)
+# [Xeldorado Protocol](https://main.xeldorado.live/)
 ### Xeldorado - A general purpose Creator Social Token (CST) Protocol that implements Creator Economy using:
 #### 1. Growth Tokens
   Creator/Community Social Tokens that offer potential increase in price as Creator/Community grows. Growth Tokens are superior version of Loyalty Tokens. They are traded with in-house AMM and offers:
@@ -101,9 +101,9 @@ Creator/Community can decide to opt for anyone of them.
 
 ## Documentation
 
-Visual Explanations for protocol: [Understand](https://nft.xeldorado.live/index.html#xeldoradoprotocol)
+Visual Explanations for protocol: [Understand](https://main.xeldorado.live/index.html#xeldoradoprotocol)
 
-<!-- <a href="https://nft.xeldorado.live/index.html#xeldoradoprotocol" target="_blank"><img src="https://nft.xeldorado.live/images/logo.png" width="150" height="30"/></a> -->
+<!-- <a href="https://main.xeldorado.live/index.html#xeldoradoprotocol" target="_blank"><img src="https://main.xeldorado.live/images/logo.png" width="150" height="30"/></a> -->
 
 White paper & Docs for Xeldorado Protocol is currently under development.
 
@@ -131,10 +131,10 @@ The primary license for Xeldorado Contracts V1 is the Business Source License 1.
 
 ## Community
 
-<a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://nft.xeldorado.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://t.me/xeldorado" target="_blank"><img src="https://nft.xeldorado.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://twitter.com/XeldoradoLabs" target="_blank"><img src="https://nft.xeldorado.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://www.reddit.com/r/Xeldorado_/" target="_blank"><img src="https://nft.xeldorado.live/images/reddit.png" width="80" height="80"/></a>
+<a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://main.xeldorado.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://t.me/xeldorado" target="_blank"><img src="https://main.xeldorado.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://twitter.com/XeldoradoLabs" target="_blank"><img src="https://main.xeldorado.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://www.reddit.com/r/Xeldorado_/" target="_blank"><img src="https://main.xeldorado.live/images/reddit.png" width="80" height="80"/></a>
 
 ## Responsible disclosure
 
