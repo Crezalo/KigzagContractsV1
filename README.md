@@ -99,6 +99,30 @@ Creator/Community can decide to opt for anyone of them.
 #### 2. Loyalty Tokens
 ![Samrt Contract Flow Diagram](./Images/XeldoradoCoreSmartContractDesign_LT.png)
 
+## Network Expansion Plans
+
+We plan to fist expand to all the networks that are EVM compatible and have significantly low gas fees:
+
+1. Polygon
+2. BSC 
+3. Avalanche 
+4. Fantom 
+5. Arbitrum 
+6. Optimism 
+7. MoonRiver 
+8. xDai 
+9. Harmony 
+10. Polkadot
+11. Solana (Using Solang Compiler or maybe Neon)
+   
+We further plan to expand to EVM non-compatible networks depending on user demand:
+
+1. Solana 
+2. Algorand 
+3. Cardano 
+4. Terra 
+
+
 ## Documentation
 
 <!-- Visual Explanations for protocol: [Understand](https://main.xeldorado.live/index.html#xeldoradoprotocol) -->
