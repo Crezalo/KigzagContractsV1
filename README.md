@@ -101,7 +101,7 @@ Creator/Community can decide to opt for anyone of them.
 
 ## Documentation
 
-Visual Explanations for protocol: [Understand](https://main.xeldorado.live/index.html#xeldoradoprotocol)
+<!-- Visual Explanations for protocol: [Understand](https://main.xeldorado.live/index.html#xeldoradoprotocol) -->
 
 <!-- <a href="https://main.xeldorado.live/index.html#xeldoradoprotocol" target="_blank"><img src="https://main.xeldorado.live/images/logo.png" width="150" height="30"/></a> -->
 
