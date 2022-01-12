@@ -15,11 +15,56 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     address[] public override allCreators;
 
     address public override exchangeAdmin;
+    uint public override fee;
+    uint public override discount;
+    uint public override noOFTokensForDiscount;
+    address public override feeTo;
+    address public override feeToSetter;
+    address public override exchangeToken;
     uint votingDuration; //default value although creator can change in DAO contract // in seconds
 
-    constructor() {
+    constructor(address _feeTo, address _feeToSetter, address _exchangeToken) {
         exchangeAdmin = msg.sender;   
         votingDuration = 420; // in seconds
+        fee = 50; // on scale of 10000
+        discount = 25; // on scale of 10000
+        feeTo = _feeTo;
+        feeToSetter = _feeToSetter;
+        exchangeToken = _exchangeToken;
+        noOFTokensForDiscount = 50 * 10**18;
+    }
+
+    function setFeeTo(address _feeTo) public virtual override {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        feeTo = _feeTo;
+    }
+
+    function setFeeToSetter(address _feeToSetter) public virtual override {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        feeToSetter = _feeToSetter;
+    }
+    
+    function setFee(uint _fee) public virtual override {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        fee = _fee;
+        // set to 50 (i.e. 0.5% on the scale of 10000)
+    }
+    
+    function setDiscount(uint _discount) public virtual override {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        discount = _discount;
+        // set to 50 (i.e. 0.5% on the scale of 10000)
+    }
+
+    function setExchangeToken(address _exchangeToken) public virtual override {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        exchangeToken = _exchangeToken;
+    }
+    
+    function setNoOFTokensForDiscount(uint _noOFTokensForDiscount) public virtual override {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        noOFTokensForDiscount = _noOFTokensForDiscount;
+        // set to 50 (i.e. 0.5% on the scale of 10000)
     }
 
     modifier onlyCreatorOrAdmin(address _creator) {
@@ -38,12 +83,13 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
       return false;
     }
     
-    function creatorExist(address _creator) public view override returns (bool){
-      for (uint i; i < allCreators.length;i++){
-          if (allCreators[i]==_creator) return true;
-      }
-      return false;
-    }
+    // for loop cannot be scalable
+    // function creatorExist(address _creator) public view override returns (bool){
+    //   for (uint i; i < allCreators.length;i++){
+    //       if (allCreators[i]==_creator) return true;
+    //   }
+    //   return false;
+    // }
     
     function newCreator(address _creator, string memory _name, string memory _symbol, address _basetoken, uint _creatorSaleFee, address _vault) public virtual override returns(address token, address dao) {
         allCreators.push(_creator);

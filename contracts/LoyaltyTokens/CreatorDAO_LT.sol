@@ -277,4 +277,10 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
         TotalAllowances -= amount;
         emit allowancesRedeemed(creator, amount, msg.sender);
     }
+
+    function burnUsedToken() public virtual override {
+        currentBalanceUpdate();
+        ICreatorToken_LT(token).burnMyTokens(tokenBalance);
+        currentBalanceUpdate();
+    }
 }

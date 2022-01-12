@@ -33,6 +33,7 @@ interface ICreatorDAO_LT{
     function currentBalanceUpdate() external;
     function updateManagerAllowances(uint proposalId) external;
     function sendAllowances(address[] memory members, uint[] memory amount) external;
+    function burnUsedToken() external;
     
     // only allowance transferer can call
     // usually mangers can call but in practise anyone can call

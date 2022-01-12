@@ -52,12 +52,26 @@ contract CreatorToken_LT is ERC20, ICreatorToken_LT {
         _mint(_to,_amount);
         emit tokensMinted(address(this), _amount, _to);
     }
+      
+    function calculateFee(uint amount, uint fee) internal pure returns (uint) {
+        // fee percent in scale of 10000
+        return amount.mul(fee)/10000;
+    }
 
     // msg.sender is _to
     // amount in quantity of creator tokens 
     // NOT in 10^18 decimal
     function buyTokens(uint _amount) public virtual override {
-        require(IERC20(basetoken).transferFrom(msg.sender, dao, _amount.mul(IXeldoradoCreatorFactory_LT(creatorfactory).creatorSaleFee(creator))),'Xeldorado: base token transfer failed');
+        uint discount;
+
+        if(IXeldoradoCreatorFactory_LT(creatorfactory).noOFTokensForDiscount() <= IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).exchangeToken()).balanceOf(msg.sender)) {
+            discount = IXeldoradoCreatorFactory_LT(creatorfactory).discount();
+        }
+
+        uint total = _amount.mul(IXeldoradoCreatorFactory_LT(creatorfactory).creatorSaleFee(creator));
+        uint totalFee = calculateFee(total, IXeldoradoCreatorFactory_LT(creatorfactory).fee().sub(discount));
+        require(IERC20(basetoken).transferFrom(msg.sender, dao, total.sub(totalFee)),'Xeldorado: base token transfer failed');
+        require(IERC20(basetoken).transferFrom(msg.sender, IXeldoradoCreatorFactory_LT(creatorfactory).feeTo(), totalFee),'Xeldorado: base token transfer failed');
         _mint(msg.sender, _amount.mul(10**18));
         ICreatorDAO_LT(dao).currentBalanceUpdate();
     }
