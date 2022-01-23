@@ -69,26 +69,26 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
         }
     }
 
-    function listNFTsForSale(uint[] memory vaultIds, uint[] memory priceInBaseTokens) public virtual override onlyCreatorOrAdmins lock {
-        require(vaultIds.length==priceInBaseTokens.length,'Xeldorado: unbalanced array');
+    function listNFTsForSale(uint[] memory vaultIds, uint[] memory priceInCreatorTokenss) public virtual override onlyCreatorOrAdmins lock {
+        require(vaultIds.length==priceInCreatorTokenss.length,'Xeldorado: unbalanced array');
         for(uint i=0;i<vaultIds.length;i++){
             require(vaultIdTonftPrice[vaultIds[i]] == 0 ,'Xeldorado: already listed');
             require(IERC721(vaultIdTonftContract[vaultIds[i]]).ownerOf(vaultIdToTokenId[vaultIds[i]]) == address(this) ,'Xeldorado: already sold');
-            vaultIdTonftPrice[vaultIds[i]] = priceInBaseTokens[i];
+            vaultIdTonftPrice[vaultIds[i]] = priceInCreatorTokenss[i];
             allOnSaleNFTs +=1;
-            emit NFTListed(vaultIds[i], priceInBaseTokens[i]);
+            emit NFTListed(vaultIds[i], priceInCreatorTokenss[i]);
         }
     }
 
-    function updateNFTPrice(uint[] memory vaultIds, uint[] memory priceInBaseTokens) public virtual override onlyCreatorOrAdmins lock {
-        require(vaultIds.length==priceInBaseTokens.length,'Xeldorado: unbalanced array');
+    function updateNFTPrice(uint[] memory vaultIds, uint[] memory priceInCreatorTokenss) public virtual override onlyCreatorOrAdmins lock {
+        require(vaultIds.length==priceInCreatorTokenss.length,'Xeldorado: unbalanced array');
         for(uint i=0;i<vaultIds.length;i++){
             require(vaultIdTonftPrice[vaultIds[i]] != 0 ,'Xeldorado: not listed');
-            vaultIdTonftPrice[vaultIds[i]] = priceInBaseTokens[i];
-            if(priceInBaseTokens[i] == 0){
+            vaultIdTonftPrice[vaultIds[i]] = priceInCreatorTokenss[i];
+            if(priceInCreatorTokenss[i] == 0){
                 allOnSaleNFTs -= 1;
             }
-            emit NFTListingUpdate(vaultIds[i], priceInBaseTokens[i]);
+            emit NFTListingUpdate(vaultIds[i], priceInCreatorTokenss[i]);
         }
     }
     
