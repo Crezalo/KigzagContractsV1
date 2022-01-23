@@ -10,7 +10,12 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     mapping(address => address) public override creatorToken;
     mapping(address => address) public override creatorVault;
     mapping(address => address) public override creatorDAO;
-    mapping(address => uint) public override creatorSaleFee; // Sale of token as tickets // price or quantity of base tokens
+    // Sale of token as tickets 
+    // price or quantity of base tokens 
+    // will have 2 values-
+    // at index: 0 native token price
+    // at index: 1 USD token price
+    mapping(address => uint[]) private creatorSaleFee; 
     mapping(address => address[]) creatorAdmins; // creator is not added to admins
     address[] public override allCreators;
 
@@ -21,9 +26,12 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     address public override feeTo;
     address public override feeToSetter;
     address public override exchangeToken;
+    address public override networkWrappedToken;
+    address public override usdc;
+    address public override dai;
     uint votingDuration; //default value although creator can change in DAO contract // in seconds
 
-    constructor(address _feeTo, address _feeToSetter, address _exchangeToken) {
+    constructor(address _feeTo, address _feeToSetter, address _exchangeToken, address _networkWrappedToken, address _usdc, address _dai) {
         exchangeAdmin = msg.sender;   
         votingDuration = 420; // in seconds
         fee = 50; // on scale of 10000
@@ -31,6 +39,9 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
         feeTo = _feeTo;
         feeToSetter = _feeToSetter;
         exchangeToken = _exchangeToken;
+        networkWrappedToken = _networkWrappedToken;
+        usdc = _usdc;
+        dai = _dai;
         noOFTokensForDiscount = 50 * 10**18;
     }
 
@@ -75,6 +86,10 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     function getCreatorAdmins(address _creator) public virtual override view returns(address[] memory){
         return creatorAdmins[_creator];
     }
+
+    function getCreatorSaleFee(address _creator) public virtual override view returns(uint[] memory){
+        return creatorSaleFee[_creator];
+    }
     
     function isCreatorAdmin(address _creator, address _admin) public view override returns (bool){
       for (uint i; i < creatorAdmins[_creator].length;i++){
@@ -83,57 +98,55 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
       return false;
     }
     
-    // for loop cannot be scalable
-    // function creatorExist(address _creator) public view override returns (bool){
-    //   for (uint i; i < allCreators.length;i++){
-    //       if (allCreators[i]==_creator) return true;
-    //   }
-    //   return false;
-    // }
-    
-    function newCreator(address _creator, string memory _name, string memory _symbol, address _basetoken, uint _creatorSaleFee, address _vault) public virtual override returns(address token, address dao) {
+    function newCreator(address _creator, string memory _name, string memory _symbol, uint _creatorSaleFeeNative, uint _creatorSaleFeeUSD, address _vault) public virtual override returns(address token, address dao) {
         allCreators.push(_creator);
-        creatorSaleFee[_creator] = _creatorSaleFee;
+        creatorSaleFee[_creator].push(_creatorSaleFeeNative);
+        creatorSaleFee[_creator].push(_creatorSaleFeeUSD);
 
         // deploying token contract
-        token = _createToken(_creator, _name, _symbol, _basetoken);
+        token = _createToken(_creator, _name, _symbol);
 
         // deploying DAO contract
-        dao = _createDAO(_creator, token, _basetoken);
+        dao = _createDAO(_creator, token);
 
         // deploying vault contract
-        _initialiseVault(_vault, _creator, _name, _symbol, token, dao);
+        _initialiseVault(_vault, _creator, _name, _symbol, token);
     }
 
-    function _createToken(address _creator, string memory _name, string memory _symbol, address _basetoken) internal returns (address token){
+    function _createToken(address _creator, string memory _name, string memory _symbol) internal returns (address token){
         require(creatorToken[_creator] == address(0),'Xeldorado: Token exist');
-        CreatorToken_LT ctoken = new CreatorToken_LT(_creator, _name, _symbol, _basetoken);
+        CreatorToken_LT ctoken = new CreatorToken_LT(_creator, _name, _symbol);
         token = address(ctoken);
         creatorToken[_creator] = token;
         emit CreatorTokenCreated(token,_creator);
     }
 
-    function _createDAO(address _creator, address _token, address _basetoken) internal returns (address dao){
+    function _createDAO(address _creator, address _token) internal returns (address dao){
         require(creatorDAO[_creator] == address(0),'Xeldorado: DAO exist');
-        CreatorDAO_LT cdao = new CreatorDAO_LT(_creator, votingDuration, _token, _basetoken);
+        CreatorDAO_LT cdao = new CreatorDAO_LT(_creator, votingDuration, _token);
         dao = address(cdao);
         creatorDAO[_creator] = dao;
         ICreatorToken_LT(_token).initialize(dao);
         emit CreatorDAOCreated(dao,_creator);
     }
 
-    function _initialiseVault(address _vault, address _creator, string memory _name, string memory _symbol, address _token, address _dao) internal {
+    function _initialiseVault(address _vault, address _creator, string memory _name, string memory _symbol, address _token) internal {
         require(creatorVault[_creator] == address(0),'Xeldorado: Vault exist');
-        IXeldoradoVault_LT(_vault).initialise(_name, _symbol, _token, _dao);
+        IXeldoradoVault_LT(_vault).initialise(_name, _symbol, _token);
         creatorVault[_creator] = _vault;
         emit CreatorVaultCreated(_vault,_creator);
     }
 
-    // only creator can call
-    function updateCreatorSaleFee(address _creator, uint _creatorSaleFee) public virtual override onlyCreatorOrAdmin(_creator) {
-        creatorSaleFee[_creator] = _creatorSaleFee;
+    // only creator or admins can call
+    function updateCreatorSaleFeeNative(address _creator, uint _creatorSaleFeeNative) public virtual override onlyCreatorOrAdmin(_creator) {
+        creatorSaleFee[_creator][0] = _creatorSaleFeeNative;
     }
     
+    // only creator or admins can call
+    function updateCreatorSaleFeeUSD(address _creator, uint _creatorSaleFeeUSD) public virtual override onlyCreatorOrAdmin(_creator) {
+        creatorSaleFee[_creator][1] = _creatorSaleFeeUSD;
+    }
+
     // only creator or admins can call
     // check if creatorAdmins already exists first before calling
     function setCreatorAdmins(address _creator, address[] memory admins) public virtual override onlyCreatorOrAdmin(_creator) {

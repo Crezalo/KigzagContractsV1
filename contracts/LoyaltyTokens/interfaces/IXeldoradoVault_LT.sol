@@ -8,7 +8,6 @@ interface IXeldoradoVault_LT {
     event NFTSold(address _nft, uint _tokenId, uint vaultId, uint price);
 
     function creator() external view returns(address);
-    function dao() external view returns(address);
     function token() external view returns(address);
     function vaultIdTonftContract(uint) external view returns(address);
     function vaultIdToTokenId(uint) external view returns(uint);
@@ -19,7 +18,7 @@ interface IXeldoradoVault_LT {
     function nftContract() external view returns(address); 
 
     // only creator factory can initialise
-    function initialise(string memory _name, string memory _symbol, address _token, address _dao) external;
+    function initialise(string memory _name, string memory _symbol, address _token) external;
 
     function buyNFT(address _to, uint[] memory _vaultIds) external;
 

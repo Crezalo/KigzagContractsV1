@@ -9,7 +9,6 @@ interface ICreatorToken_LT is IERC20, IERC20Metadata {
     event tokensBurnt(address ctoken, uint amount, address _of);
 
     function creator() external view returns(address);
-    function basetoken() external view returns(address);
     function dao() external view returns(address);
 
     // only creator factory can call
@@ -22,5 +21,5 @@ interface ICreatorToken_LT is IERC20, IERC20Metadata {
     function burnMyTokens(uint _amount) external;
 
     // caller will buy token against base token
-    function buyTokens(uint _amount) external;
+    function buyTokens(uint _amount, address _basetoken) external;
 }

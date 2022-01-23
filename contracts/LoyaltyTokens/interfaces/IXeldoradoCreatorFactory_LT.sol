@@ -13,7 +13,7 @@ interface IXeldoradoCreatorFactory_LT {
     function creatorToken(address _creator) external view returns(address);
     function creatorVault(address _creator) external view returns(address);
     function creatorDAO(address _creator) external view returns(address);
-    function creatorSaleFee(address _creator) external view returns(uint);
+    function getCreatorSaleFee(address _creator) external view returns(uint[] memory);
     function allCreators(uint) external view returns(address);
     function exchangeAdmin() external view returns(address);
     function fee() external view returns(uint);
@@ -22,11 +22,13 @@ interface IXeldoradoCreatorFactory_LT {
     function feeTo() external view returns (address);
     function feeToSetter() external view returns (address);
     function exchangeToken() external view returns (address);
+    function networkWrappedToken() external view returns (address);
+    function usdc() external view returns (address);
+    function dai() external view returns (address);
     function getCreatorAdmins(address _creator) external view returns(address[] memory);
     function isCreatorAdmin(address _creator, address admin) external view returns(bool);
-    // function creatorExist(address _creator) external view returns(bool);
 
-    function newCreator(address _creator, string memory _name, string memory _symbol, address _basetoken, uint _creatorSaleFee, address _vault) external returns(address token, address dao);
+    function newCreator(address _creator, string memory _name, string memory _symbol, uint _creatorSaleFeeNative, uint _creatorSaleFeeUSD, address _vault) external returns(address token, address dao);
     
     // only admin or creator can call
     // function requestDirectTransferApproval(address _creator) external;
@@ -34,7 +36,8 @@ interface IXeldoradoCreatorFactory_LT {
     function removeCreatorAdmins(address _creator, uint index) external;
 
     // only creator can call
-    function updateCreatorSaleFee(address _creator, uint _creatorSaleFee) external;
+    function updateCreatorSaleFeeNative(address _creator, uint _creatorSaleFeeNative) external;
+    function updateCreatorSaleFeeUSD(address _creator, uint _creatorSaleFeeNative) external;
 
     // only feeToSetter can call
     function setFeeTo(address) external;

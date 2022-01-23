@@ -12,7 +12,6 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
     using SafeMath  for uint;
     
     address public override creator;
-    address public override dao;
     address public override token;
     mapping(uint=>address) public override vaultIdTonftContract;    
     mapping(uint=>uint) public override vaultIdToTokenId;
@@ -47,13 +46,12 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
     }
 
     // only creator factory can initialise
-    function initialise(string memory _name, string memory _symbol, address _token, address _dao) public virtual override {
+    function initialise(string memory _name, string memory _symbol, address _token) public virtual override {
         require(token==address(0),'Xeldorado: initialised');
         creatorfactory = msg.sender; // function called via creator factory
         nftcontract = new CreatorNFT_LT(creator,_name,_symbol);
         nftContract = address(nftcontract);
         token = _token;
-        dao = _dao;
     }
     
     // only creator or admins can call
@@ -98,8 +96,8 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
             require(IERC721(vaultIdTonftContract[_vaultIds[i]]).ownerOf(vaultIdToTokenId[_vaultIds[i]]) == address(this), 'Xeldorado: Already bought!');
             require(vaultIdTonftPrice[_vaultIds[i]]!=0,'Xeldorado: not for sale');
             IERC721(vaultIdTonftContract[_vaultIds[i]]).transferFrom(address(this), _to, vaultIdToTokenId[_vaultIds[i]]);
-            ICreatorToken_LT(token).transferFrom(_to, dao, vaultIdTonftPrice[_vaultIds[i]]);
-            ICreatorDAO_LT(dao).currentBalanceUpdate();
+            ICreatorToken_LT(token).transferFrom(_to, address(this), vaultIdTonftPrice[_vaultIds[i]]);
+            ICreatorToken_LT(token).burnMyTokens(ICreatorToken_LT(token).balanceOf(address(this)));
             allSoldNFTs += 1;
             allOnSaleNFTs -= 1;
             emit NFTSold(vaultIdTonftContract[_vaultIds[i]], vaultIdToTokenId[_vaultIds[i]], _vaultIds[i],  vaultIdTonftPrice[_vaultIds[i]]);

@@ -15,25 +15,27 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
 
     address public override creator;
     address public override token;
-    address public override basetoken;
-    mapping(address=>uint) public override allowances; 
+    mapping(address=>uint) public override nativeTokenAllowances; 
+    mapping(address=>uint) public override usdAllowances;
     uint public override proposals;
-    uint public override tokenBalance;
-    uint public override baseTokenBalance;
+    uint public override nativeTokenBalance;
+    uint public override usdBalance;
     uint public override votingDuration; //time in seconds
     
     address[] public override communityManagers; 
     uint[] public override allowancesProposalIds; 
-    uint public override TotalAllowances;
+    uint public override nativeTotalAllowances;
+    uint public override usdTotalAllowances;
 
     struct generalProposalData{
         uint choices;
         address proposer;
         string link;
         uint startTimeStamp;
-        uint category;
+        uint category; // 1 for allowances  // 2 for general proposal
 
         // required in case of Allowances for managers
+        bool nativeAllowance; // false for usd 
         address[] managers;
         mapping(address=>uint) proposedAllowancesAmount;
     }
@@ -90,17 +92,17 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     // use to ensure TotalBalance of DAO >= Sum(Allowances)
     modifier checkBalanceOverFlow(){
         _;
-        require(baseTokenBalance>=TotalAllowances,'Xeldorado: Approved Amount OverfLow');
+        require(nativeTokenBalance>=nativeTotalAllowances,'Xeldorado: Native Approved Amount OverfLow');
+        require(usdBalance>=usdTotalAllowances,'Xeldorado: USD Approved Amount OverfLow');
     }
 
-    constructor(address _creator, uint _votingDuration, address _token, address _basetoken) {
+    constructor(address _creator, uint _votingDuration, address _token) {
         creatorfactory = msg.sender; // CreatorFactory deploys
         creator = _creator; 
         unlocked = 1;
         proposals = 0;
         votingDuration = _votingDuration; // in seconds
         token = _token;
-        basetoken = _basetoken;
         currentBalanceUpdate();
     }
 
@@ -131,8 +133,11 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     }
 
     function currentBalanceUpdate() public virtual override {
-        tokenBalance = IERC20(token).balanceOf(address(this));
-        baseTokenBalance = IERC20(basetoken).balanceOf(address(this));
+        // balance of network/native token
+        nativeTokenBalance = IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).networkWrappedToken()).balanceOf(address(this));
+
+        // balance of usdc + dai
+        usdBalance = IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).usdc()).balanceOf(address(this)).add(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).dai()).balanceOf(address(this)));
     }
 
     // only creator oe admins can call
@@ -168,15 +173,17 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
         currentBalanceUpdate();
     }
 
-    //only holders can call
+    // only holders can call
+    // proposal can either be in USD or native token decided by _nativeAllowance
     // it allows multiple members for different allowances amount in same proposal 
     // for this proposedAllowancesAmount  for a member is shifted to generalProposalData
     // allowances will happen in base tokens
-    function allowancesProposal(uint[] memory amount, address[] memory managers) public virtual override onlyHolders lock {
+    function allowancesProposal(uint[] memory amount, address[] memory managers, bool _nativeAllowance) public virtual override onlyHolders lock {
         require(managers.length==amount.length,'Xeldorado: unbalanced array');
         proposalIdToProposalData[proposals].proposer = msg.sender;
-        proposalIdToProposalData[proposals].category = 2;
+        proposalIdToProposalData[proposals].category = 1;
         proposalIdToProposalData[proposals].choices = 2;
+        proposalIdToProposalData[proposals].nativeAllowance = _nativeAllowance;
         for(uint i;i<managers.length;i++)
         {
             proposalIdToProposalData[proposals].managers.push(managers[i]);
@@ -191,7 +198,7 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     //only holders can call
     function generalProposal(string memory linkToProposal, uint _choices) public virtual override onlyHolders lock {
         proposalIdToProposalData[proposals].proposer = msg.sender;
-        proposalIdToProposalData[proposals].category = 3;
+        proposalIdToProposalData[proposals].category = 2;
         proposalIdToProposalData[proposals].link = linkToProposal;
         proposalIdToProposalData[proposals].choices = _choices;
         proposalIdToProposalData[proposals].startTimeStamp = block.timestamp;
@@ -235,9 +242,15 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
         uint manCount = proposalIdToProposalData[proposalId].managers.length;
         for(uint i;i<manCount;i++)
         {
-            allowances[proposalIdToProposalData[proposalId].managers[i]] += proposalIdToProposalData[proposalId].proposedAllowancesAmount[proposalIdToProposalData[proposalId].managers[i]];
-            TotalAllowances += proposalIdToProposalData[proposalId].proposedAllowancesAmount[proposalIdToProposalData[proposalId].managers[i]];
-            emit allowancesUpdated(address(this), address(this) ,proposalIdToProposalData[proposalId].managers[i], proposalIdToProposalData[proposalId].proposedAllowancesAmount[proposalIdToProposalData[proposalId].managers[i]]);
+            if(proposalIdToProposalData[proposalId].nativeAllowance){
+                nativeTokenAllowances[proposalIdToProposalData[proposalId].managers[i]] += proposalIdToProposalData[proposalId].proposedAllowancesAmount[proposalIdToProposalData[proposalId].managers[i]];
+                nativeTotalAllowances += proposalIdToProposalData[proposalId].proposedAllowancesAmount[proposalIdToProposalData[proposalId].managers[i]];
+            }
+            else{
+                usdAllowances[proposalIdToProposalData[proposalId].managers[i]] += proposalIdToProposalData[proposalId].proposedAllowancesAmount[proposalIdToProposalData[proposalId].managers[i]];
+                usdTotalAllowances += proposalIdToProposalData[proposalId].proposedAllowancesAmount[proposalIdToProposalData[proposalId].managers[i]];
+            }
+            emit allowancesUpdated(address(this), address(this) ,proposalIdToProposalData[proposalId].managers[i], proposalIdToProposalData[proposalId].proposedAllowancesAmount[proposalIdToProposalData[proposalId].managers[i]], proposalIdToProposalData[proposalId].nativeAllowance);
             proposalIdToProposalData[proposalId].proposedAllowancesAmount[proposalIdToProposalData[proposalId].managers[i]]=0;
         }
     }
@@ -245,42 +258,75 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     // msg.sender's allowances will be deducted to add allowances to _to[]
     // managers who have been voted to get allowances can transfer their allowances to folks they employ
     // TotalAllowances will remain same just shuffle inside Allowances mapping
-    function setAllowances(address[] memory _to, uint[] memory _amount) public virtual override lock {
+    function setAllowances(address[] memory _to, uint[] memory _amount, bool _nativeAllowance) public virtual override lock {
         for(uint i;i<_amount.length;i++){
-            require(_amount[i]<allowances[msg.sender],'Xeldorado: not enough allowances');
-            allowances[msg.sender] -= _amount[i];
-            allowances[_to[i]] += _amount[i];
-            emit allowancesUpdated(address(this), msg.sender, _to[i], _amount[i]);
+            if(_nativeAllowance) {
+                require(_amount[i]<nativeTokenAllowances[msg.sender],'Xeldorado: not enough allowances');
+                nativeTokenAllowances[msg.sender] -= _amount[i];
+                nativeTokenAllowances[_to[i]] += _amount[i];
+            }
+            else{
+                require(_amount[i]<usdAllowances[msg.sender],'Xeldorado: not enough allowances');
+                usdAllowances[msg.sender] -= _amount[i];
+                usdAllowances[_to[i]] += _amount[i];
+            }
+            emit allowancesUpdated(address(this), msg.sender, _to[i], _amount[i], _nativeAllowance);
         }
     }
 
     // batch send allowances
-    function sendAllowances(address[] memory members, uint[] memory amount) public virtual override lock {
-        require(members.length==amount.length,'Xeldorado: unbalanced array');
+    // tokenId -> 1 for nativeToken, 2 for usdc, 3 for dai
+    function sendAllowances(address[] memory members, uint[] memory amount, uint[] memory tokenId) public virtual override lock {
+        require(members.length==amount.length && amount.length==tokenId.length,'Xeldorado: unbalanced array');
         for(uint i;i<members.length;i++)
         {
-            require(amount[i] <= allowances[members[i]], 'Xeldorado: amount exceeds grant');
-            require(IERC20(basetoken).transfer(members[i], amount[i]), 'Xeldorado: grant transfer failed');
-            allowances[members[i]] -= amount[i];
-            TotalAllowances -= amount[i];
-            emit allowancesRedeemed(creator, amount[i], members[i]);
+            if(tokenId[i]==1){ // native token
+                require(amount[i] <= nativeTokenAllowances[members[i]], 'Xeldorado: amount exceeds grant');
+                require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).networkWrappedToken()).transfer(members[i], amount[i]), 'Xeldorado: grant transfer failed');
+                nativeTokenAllowances[members[i]] -= amount[i];
+                nativeTotalAllowances -= amount[i];
+            }
+            else if(tokenId[i]==2){ // usdc
+                require(amount[i] <= usdAllowances[members[i]], 'Xeldorado: amount exceeds grant');
+                require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).usdc()).transfer(members[i], amount[i]), 'Xeldorado: grant transfer failed');
+                usdAllowances[members[i]] -= amount[i];
+                usdTotalAllowances -= amount[i];
+            }
+            else if(tokenId[i]==3){ // dai
+                require(amount[i] <= usdAllowances[members[i]], 'Xeldorado: amount exceeds grant');
+                require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).dai()).transfer(members[i], amount[i]), 'Xeldorado: grant transfer failed');
+                usdAllowances[members[i]] -= amount[i];
+                usdTotalAllowances -= amount[i];
+            }
+            else{
+                require(0==1,'Xeldorado: invalid tokenId');
+            }
+            emit allowancesRedeemed(creator, amount[i], members[i], tokenId[i]);
         }
         currentBalanceUpdate();
     }
 
     // only allowance receving member can call
-    function redeemAllowances(uint amount) public virtual override lock {
-        require(amount <= allowances[msg.sender], 'Xeldorado: amount exceeds grant');
-        require(IERC20(basetoken).transfer(msg.sender, amount), 'Xeldorado: grant transfer failed');
-        allowances[msg.sender] -= amount;
-        currentBalanceUpdate();
-        TotalAllowances -= amount;
-        emit allowancesRedeemed(creator, amount, msg.sender);
-    }
-
-    function burnUsedToken() public virtual override {
-        currentBalanceUpdate();
-        ICreatorToken_LT(token).burnMyTokens(tokenBalance);
+    function redeemAllowances(uint amount, uint tokenId) public virtual override lock {
+        if(tokenId==1){ // native token
+            require(amount <= nativeTokenAllowances[msg.sender], 'Xeldorado: amount exceeds grant');
+            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).networkWrappedToken()).transfer(msg.sender, amount), 'Xeldorado: grant transfer failed');
+            nativeTokenAllowances[msg.sender] -= amount;
+            nativeTotalAllowances -= amount;
+        }
+        else if(tokenId==2){ // usdc
+            require(amount <= usdAllowances[msg.sender], 'Xeldorado: amount exceeds grant');
+            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).usdc()).transfer(msg.sender, amount), 'Xeldorado: grant transfer failed');
+            usdAllowances[msg.sender] -= amount;
+            usdTotalAllowances -= amount;
+        }
+        else if(tokenId==3){ // dai
+            require(amount <= usdAllowances[msg.sender], 'Xeldorado: amount exceeds grant');
+            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).dai()).transfer(msg.sender, amount), 'Xeldorado: grant transfer failed');
+            usdAllowances[msg.sender] -= amount;
+            usdTotalAllowances -= amount;
+        }
+        emit allowancesRedeemed(creator, amount, msg.sender, tokenId);
         currentBalanceUpdate();
     }
 }
