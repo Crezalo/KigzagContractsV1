@@ -18,7 +18,7 @@ interface IXeldoradoVault_LT {
     function nftContract() external view returns(address); 
 
     // only creator factory can initialise
-    function initialise(string memory _name, string memory _symbol, address _token) external;
+    function initialise(address _creator, string memory _name, string memory _symbol, address _token) external;
 
     function buyNFT(address _to, uint[] memory _vaultIds) external;
 

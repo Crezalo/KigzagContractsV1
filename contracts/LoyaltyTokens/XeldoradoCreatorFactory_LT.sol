@@ -2,9 +2,9 @@
 pragma solidity ^0.8.4;
 
 import './CreatorToken_LT.sol';
-import './CreatorDAO_LT.sol';
 import './interfaces/IXeldoradoCreatorFactory_LT.sol';
-import './XeldoradoVault_LT.sol';
+import './interfaces/ICreatorDAO_LT.sol';
+import './interfaces/IXeldoradoVault_LT.sol';
 
 contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     mapping(address => address) public override creatorToken;
@@ -98,7 +98,7 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
       return false;
     }
     
-    function newCreator(address _creator, string memory _name, string memory _symbol, uint _creatorSaleFeeNative, uint _creatorSaleFeeUSD, address _vault) public virtual override returns(address token, address dao) {
+    function newCreator(address _creator, address _dao, address _vault, string memory _name, string memory _symbol, uint _creatorSaleFeeNative, uint _creatorSaleFeeUSD) public virtual override returns(address token) {
         allCreators.push(_creator);
         creatorSaleFee[_creator].push(_creatorSaleFeeNative);
         creatorSaleFee[_creator].push(_creatorSaleFeeUSD);
@@ -106,10 +106,10 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
         // deploying token contract
         token = _createToken(_creator, _name, _symbol);
 
-        // deploying DAO contract
-        dao = _createDAO(_creator, token);
+        // initialising deployed DAO contract
+        _initialiseDAO(_dao, _creator, token);
 
-        // deploying vault contract
+        // initialising deployed vault contract
         _initialiseVault(_vault, _creator, _name, _symbol, token);
     }
 
@@ -121,10 +121,9 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
         emit CreatorTokenCreated(token,_creator);
     }
 
-    function _createDAO(address _creator, address _token) internal returns (address dao){
+    function _initialiseDAO(address dao, address _creator, address _token) internal {
         require(creatorDAO[_creator] == address(0),'Xeldorado: DAO exist');
-        CreatorDAO_LT cdao = new CreatorDAO_LT(_creator, votingDuration, _token);
-        dao = address(cdao);
+        ICreatorDAO_LT(dao).initialise(_creator, votingDuration,  _token);
         creatorDAO[_creator] = dao;
         ICreatorToken_LT(_token).initialize(dao);
         emit CreatorDAOCreated(dao,_creator);
@@ -132,7 +131,7 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
 
     function _initialiseVault(address _vault, address _creator, string memory _name, string memory _symbol, address _token) internal {
         require(creatorVault[_creator] == address(0),'Xeldorado: Vault exist');
-        IXeldoradoVault_LT(_vault).initialise(_name, _symbol, _token);
+        IXeldoradoVault_LT(_vault).initialise(_creator, _name, _symbol, _token);
         creatorVault[_creator] = _vault;
         emit CreatorVaultCreated(_vault,_creator);
     }

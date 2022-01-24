@@ -24,10 +24,13 @@ interface ICreatorDAO_LT{
 
     function proposal(uint proposalId) external view returns(address, string memory, uint, uint);
     function proposalManagerAllowancesInfoLength(uint proposalId) external view returns(uint);
-    function proposalManagerAllowanesInfo(uint proposalId, uint index) external view returns(address, uint);
+    function proposalManagerAllowanesInfo(uint proposalId, uint index) external view returns(address, uint, bool);
     function proposalVoteDataInfo(uint proposalId, uint choice) external view returns(uint, uint);
     function proposalStatus(uint proposalId) external view returns(uint);
     function CommunityManagerExists(address manager) external view returns(bool);
+
+    // only creator factory can call and only once
+    function initialise(address _creator, uint _votingDuration, address _token) external;
 
     // anyone can call
     function currentBalanceUpdate() external;

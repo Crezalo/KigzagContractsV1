@@ -5,7 +5,6 @@ import './CreatorNFT_LT.sol';
 import './interfaces/ICreatorToken_LT.sol';
 import './interfaces/IXeldoradoVault_LT.sol';
 import './interfaces/IXeldoradoCreatorFactory_LT.sol';
-import './interfaces/ICreatorDAO_LT.sol';
 import '../libraries/SafeMath.sol';
 
 contract XeldoradoVault_LT is IXeldoradoVault_LT{
@@ -40,16 +39,17 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
     }
     
     constructor () {
-        creator = msg.sender; // Creator 
+        // deployer will be msg.sender
         allNFTs=0;
         unlocked = 1;
     }
 
     // only creator factory can initialise
-    function initialise(string memory _name, string memory _symbol, address _token) public virtual override {
+    function initialise(address _creator, string memory _name, string memory _symbol, address _token) public virtual override {
         require(token==address(0),'Xeldorado: initialised');
+        creator = _creator; // Creator 
         creatorfactory = msg.sender; // function called via creator factory
-        nftcontract = new CreatorNFT_LT(creator,_name,_symbol);
+        nftcontract = new CreatorNFT_LT(_creator,_name,_symbol);
         nftContract = address(nftcontract);
         token = _token;
     }
@@ -82,6 +82,7 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
         require(vaultIds.length==priceInCreatorTokenss.length,'Xeldorado: unbalanced array');
         for(uint i=0;i<vaultIds.length;i++){
             require(vaultIdTonftPrice[vaultIds[i]] != 0 ,'Xeldorado: not listed');
+            require(IERC721(vaultIdTonftContract[vaultIds[i]]).ownerOf(vaultIdToTokenId[vaultIds[i]]) == address(this), 'Xeldorado: Already bought!');
             vaultIdTonftPrice[vaultIds[i]] = priceInCreatorTokenss[i];
             if(priceInCreatorTokenss[i] == 0){
                 allOnSaleNFTs -= 1;

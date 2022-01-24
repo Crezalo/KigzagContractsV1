@@ -79,13 +79,13 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
 
     // use to ensure voting is ongoing for a proposal
     modifier votingOver(uint proposalId) {
-        require(block.timestamp.sub(proposalIdToProposalData[proposalId].startTimeStamp).div(votingDuration)<1,'Xeldorado: voting duration over');
+        require(block.timestamp.sub(proposalIdToProposalData[proposalId].startTimeStamp)<(votingDuration),'Xeldorado: voting duration over');
         _;
     } 
 
     // use to ensure voting is complete for a proposal
     modifier votingNotOver(uint proposalId) {
-        require(block.timestamp.sub(proposalIdToProposalData[proposalId].startTimeStamp).div(votingDuration)>1,'Xeldorado: voting duration not over');
+        require(block.timestamp.sub(proposalIdToProposalData[proposalId].startTimeStamp)>(votingDuration),'Xeldorado: voting duration not over');
         _;
     } 
 
@@ -96,8 +96,15 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
         require(usdBalance>=usdTotalAllowances,'Xeldorado: USD Approved Amount OverfLow');
     }
 
-    constructor(address _creator, uint _votingDuration, address _token) {
-        creatorfactory = msg.sender; // CreatorFactory deploys
+    constructor() {
+        unlocked = 1;
+        proposals = 0;
+    }
+
+    // only creator factory can initialise
+    function initialise(address _creator, uint _votingDuration, address _token) public virtual override {
+        require(token==address(0),'Xeldorado: initialised');
+        creatorfactory = msg.sender; // function called via creator factory
         creator = _creator; 
         unlocked = 1;
         proposals = 0;
@@ -105,6 +112,8 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
         token = _token;
         currentBalanceUpdate();
     }
+
+    
 
     function CommunityManagerExists(address manager) public virtual override view returns(bool){
         for(uint i;i<communityManagers.length;i++){
@@ -123,9 +132,10 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
         return proposalIdToProposalData[proposalId].managers.length;
     }
 
-    function proposalManagerAllowanesInfo(uint proposalId, uint index) public virtual override view returns(address manager, uint amount) {
+    function proposalManagerAllowanesInfo(uint proposalId, uint index) public virtual override view returns(address manager, uint amount, bool nativeAllowance) {
         manager = proposalIdToProposalData[proposalId].managers[index];
         amount = proposalIdToProposalData[proposalId].proposedAllowancesAmount[manager];
+        nativeAllowance = proposalIdToProposalData[proposalId].nativeAllowance;
     }
 
     function proposalVoteDataInfo(uint proposalId, uint choice) public virtual override view returns(uint, uint){
@@ -325,6 +335,9 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
             require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).dai()).transfer(msg.sender, amount), 'Xeldorado: grant transfer failed');
             usdAllowances[msg.sender] -= amount;
             usdTotalAllowances -= amount;
+        }
+        else{
+            require(0==1,'Xeldorado: invalid tokenId');
         }
         emit allowancesRedeemed(creator, amount, msg.sender, tokenId);
         currentBalanceUpdate();

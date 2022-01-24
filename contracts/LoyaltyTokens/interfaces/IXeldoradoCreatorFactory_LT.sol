@@ -28,7 +28,7 @@ interface IXeldoradoCreatorFactory_LT {
     function getCreatorAdmins(address _creator) external view returns(address[] memory);
     function isCreatorAdmin(address _creator, address admin) external view returns(bool);
 
-    function newCreator(address _creator, string memory _name, string memory _symbol, uint _creatorSaleFeeNative, uint _creatorSaleFeeUSD, address _vault) external returns(address token, address dao);
+    function newCreator(address _creator, address _dao, address _vault, string memory _name, string memory _symbol, uint _creatorSaleFeeNative, uint _creatorSaleFeeUSD) external returns(address token);
     
     // only admin or creator can call
     // function requestDirectTransferApproval(address _creator) external;
