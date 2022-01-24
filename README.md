@@ -1,7 +1,19 @@
 # [Xeldorado Protocol](https://main.xeldorado.live/)
 ### Xeldorado - A general purpose Creator Social Token (CST) Protocol that implements Creator Economy using:
-#### 1. Growth Tokens
-  Creator/Community Social Tokens that offer potential increase in price as Creator/Community grows. Growth Tokens are superior version of Loyalty Tokens. They are traded with in-house AMM and offers:
+  
+#### 1. Loyalty Tokens
+  Creator tokens are **non-tradable** fixed price tickets to access premium services from creator. It could be exclusive video content, one-on-one intereaction (online/offline), merchandise, or in real world like access to front row seats of Creator's show (if creator is a musician or comedian). Business can also utilise our tokens to reward their loyal customers. **Any Body Can Be A CREATOR**. It is limited only to creator's imagination. 
+
+   - <b>Creator Tokens</b> : fans and followers can buy creator tokens at price fixed by creator or community. These tokens should be treated as vouchers or tickets which can be bought but one cannot sell them back directly. A creator can choose to create subscription by deducting some tokens from holder on regular basis.
+
+   - <b>NFT Sale against Creator Token</b> : Creator or community can decide upon price of NFT in creator tokens and list it for sale. 
+
+   - <b>DAO</b> : for Creator community governance. Handles community treasury.
+   
+   - <b>Payment/Allowances</b> : 3 tokens are accepted for buying of Creator Tokens as well as receiving allowances. These are wrapped network's token (like **WETH** for ethereum. **WMATIC** for polygon, **WAVAX** for Avalanche, etc.), **USDC**, **DAI**. Incase user doesn't own wrapped ERC20 version, we will integrate the function calls to wrap the token.
+  
+#### 2. Growth Tokens
+  Creator/Community are **Tradable** Social Tokens that offer potential increase in price as Creator/Community grows. Growth Tokens are superior version of Loyalty Tokens. They are traded with in-house AMM and offers:
    - <b>Liquidity Pair of CreatorToken-BaseToken</b> : Gateway between Creator Economy and External World. Creator can choose from a list of options to select best suited BaseToken. For e.g. USDC, DAI, WETH, WBTC, BUSD, etc. 
 
    - <b>NFTs that are pegged to CreatorToken</b> : Price of 1 NFT will be constant w.r.t. CreatorToken and every time a new NFT is added to the vault same number of CreatorTokens will be minted to ensure the peg. Price of NFT soars when Creator Tokens soars w.r.t. Base Tokens. Secondary Market for NFT allows price to soar further but the ceiling price of NFTs stay constant w.r.t. Creator Tokens.
@@ -9,20 +21,30 @@
    - <b>Bank</b> : for NFT backed lending borrowing of Creator Tokens
 
    - <b>DAO</b> : for Creator community governance. Handles community treasury.
-  
-#### 2. Loyalty Tokens
-  Creator tokens that are sold to offer access to premium stuff from creator. It could be exclusive video content, one-on-one, merchandise, or in real world like access to front row seats of Creator's show (if creator is a musician or comedian). It is limited only to creator's imagination. 
-   - <b>Creator Tokens</b> : fans and followers can buy creator tokens at price fixed by creator or community. These tokens should be treated as vouchers or tickets which can be bought but one cannot sell them back directly. A creator can choose to create subscription by deducting some tokens from holder on regular basis.
-
-   - <b>NFT Sale against Creator Token</b> : Creator or community can decide upon price of NFT in creator tokens and list it for sale. 
-
-   - <b>DAO</b> : for Creator community governance. Handles community treasury.
 
 Creator/Community can decide to opt for anyone of them.
 
 ## Features 
 
-### 1. Growth Tokens
+### 1. Loyalty Tokens
+- [x] <b>Creator Token</b>
+  - [x] Buy Creator Tokens at a price fixed by Creator/Community using network wrapped token like WETH/WMATIC/WAVAX or stablecoins like USDC, DAI. These base tokens/payment tokens received are send to DAO contract which handles treasury.
+
+- [x] <b>Creator DAO</b>
+  - [x] Token holders can make proposals 
+  - [x] Creator/Community can airdrop Creator Tokens to any account since these tokens cannot be sold and only be used to access premium stuff no need risks of price drop involded.
+  - [x] Creator/Community can add managers and those managers will be given allowances in base tokens / payment tokens received by the DAO contract on Creator Token sale. Using these allowances they can pay folks/employees, they hire, for specific task either on Pay Per Task basis or monthly salaries. Managers can transfer from their allowances to the employee's allowance value. 
+  - [x] 2 types of proposals 
+    - [x] Allowances Proposals to decide amount allocated per manager. Single proposal can handle multiple managers' allowances.
+    - [x] General Proposal will contain link to their DAO Forum's proposal page where detailed discussions can take place. Results of these proposals will be acted upon by community members in good faith.
+  - [x] Token holders can vote for each of the proposal
+  - [x] Result of voting is based on number of CreatorTokens held by the voter. For first case only 2 choices, no or yes. For General Proposal any number of choices are allowed. 
+  
+- [x] <b>Creator Vault</b>
+  - [x] Creator/Community can add NFTs to vault. Further list it for Sale at before mentioned price.
+  - [x] NFTs are sold for Creator Tokens which are burnt since they are only a form of voucher/tickets.
+
+### 2. Growth Tokens
 - [x] <b>Creator Vault</b>
   - [x] Creator Add/Mint NFTs to vault contract
   - [x] Launch Creator Token, make it available for community to buy. Liquidity is bought not rented. Since CreatorTokens offer NFT, DAO, Banking related utilities they do have value since day one of launch especially to access Vault NFTs.
@@ -71,24 +93,6 @@ Creator/Community can decide to opt for anyone of them.
   - [ ] If someone owns an NFT, you can buy it for premium by placing a bid (Auction smart contract will be placed separately) 
   - [ ] Base Token Pairs: Use a Curve kind of multi token pairs for BaseTokens for swap. This will help NFTs of creator that don't have same base token. Liquidity will be added by us using a small fraction of profit being earnt in BaseTokens. Swap in these pools will have no fees. 
 <hr/>
-
-### 1. Loyalty Tokens
-- [x] <b>Creator Token</b>
-  - [x] Buy Tokens at a price fixed by Creator/Community. The Base Token received are send to DAO contract which handles treasury.
-
-- [x] <b>Creator DAO</b>
-  - [x] Token holders can make proposals 
-  - [x] Creator/Community can airdrop Creator Tokens to any account since these tokens cannot be sold and only be used to access premium stuff no need risks of price drop involded.
-  - [x] Creator/Community can add managers and those managers will be given allowances in Base Tokens. Using these allowances they can pay folks/employees, they hire, for specific task either on Pay Per Task basis or monthly salaries. Managers can transfer from their allowances to the employee's allowance value. 
-  - [x] 2 types of proposals 
-    - [x] Allowances Proposals to decide amount allocated per manager. Single proposal can handle multiple managers' allowances.
-    - [x] General Proposal will contain link to their DAO Forum's proposal page where detailed discussions can take place. Results of these proposals will be acted upon by community members in good faith.
-  - [x] Token holders can vote for each of the proposal
-  - [x] Result of voting is based on number of CreatorTokens held by the voter. For first case only 2 choices, no or yes. For General Proposal any number of choices are allowed. 
-  
-- [x] <b>Creator Vault</b>
-  - [x] Creator/Community can add NFTs to vault. Further list it for Sale at before mentioned price.
-  - [x] NFTs are sold for Creator Tokens which can be burnt since they are only a form of voucher/tickets.
 
 ## Smart Contracts Flow Diagram
 
