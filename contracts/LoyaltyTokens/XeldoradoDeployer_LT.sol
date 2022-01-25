@@ -8,7 +8,7 @@ import "./interfaces/IXeldoradoCreatorFactory_LT.sol";
 // separate deployer contract to optimise on code size 
 // creating Vault and DAO objects in constructor reduces code size
 
-contract XeldoradoDeployer {
+contract XeldoradoDeployer_LT {
     address public vault;
     address public dao;
     address public token;

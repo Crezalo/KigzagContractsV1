@@ -5,6 +5,7 @@ interface ICreatorDAO_LT{
     event Airdropped(address creator, uint amount, address member);
     event allowancesUpdated(address dao, address from, address to, uint amount, bool nativeAllowance);
     event allowancesRedeemed(address dao, uint amount, address member, uint tokenId);
+    event creatorRedeemed(address dao, uint amount, uint tokenId);
     event proposalCreated(uint category, address dao, address proposer, uint proposalId);
     event managerAdded(address dao, address manager);
     event managerRemoved(address dao, address manager);
@@ -54,4 +55,8 @@ interface ICreatorDAO_LT{
     function addCommunityManager(address[] memory managers) external;
     function removeCommunityManager(uint index) external;
     function updateVotingDuration(uint _votingDuration) external;
+
+    // only creator can call
+    // comment this function in case of community run economy
+    function redeemFromTreasury(uint amount, uint tokenId) external;
 }

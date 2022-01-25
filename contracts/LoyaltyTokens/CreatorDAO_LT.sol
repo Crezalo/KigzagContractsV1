@@ -202,7 +202,7 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
         proposalIdToProposalData[proposals].startTimeStamp = block.timestamp;
         allowancesProposalIds.push(proposals);
         proposals+=1;
-        emit proposalCreated(2, address(this), msg.sender, proposals-1);
+        emit proposalCreated(1, address(this), msg.sender, proposals-1);
     }
 
     //only holders can call
@@ -213,7 +213,7 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
         proposalIdToProposalData[proposals].choices = _choices;
         proposalIdToProposalData[proposals].startTimeStamp = block.timestamp;
         proposals+=1;
-        emit proposalCreated(3, address(this), msg.sender, proposals-1);
+        emit proposalCreated(2, address(this), msg.sender, proposals-1);
     }
 
     // only holders can call
@@ -311,7 +311,7 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
             else{
                 require(0==1,'Xeldorado: invalid tokenId');
             }
-            emit allowancesRedeemed(creator, amount[i], members[i], tokenId[i]);
+            emit allowancesRedeemed(address(this), amount[i], members[i], tokenId[i]);
         }
         currentBalanceUpdate();
     }
@@ -339,7 +339,30 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
         else{
             require(0==1,'Xeldorado: invalid tokenId');
         }
-        emit allowancesRedeemed(creator, amount, msg.sender, tokenId);
+        emit allowancesRedeemed(address(this), amount, msg.sender, tokenId);
         currentBalanceUpdate();
+    }
+
+    // only creator can call
+    // comment this function in case of community run economy
+    function redeemFromTreasury(uint amount, uint tokenId) public virtual override lock checkBalanceOverFlow {
+        require(msg.sender==creator,'Xeldorado: only creator allowed');
+        if(tokenId==1){ // native token
+            require(amount <= nativeTokenBalance, 'Xeldorado: amount balance');
+            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).networkWrappedToken()).transfer(msg.sender, amount), 'Xeldorado: native token transfer failed');
+        }
+        else if(tokenId==2){ // usdc
+            require(amount <= usdBalance, 'Xeldorado: amount balance');
+            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).usdc()).transfer(msg.sender, amount), 'Xeldorado: usdc transfer failed');
+        }
+        else if(tokenId==3){ // dai
+            require(amount <= usdBalance, 'Xeldorado: amount balance');
+            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).dai()).transfer(msg.sender, amount), 'Xeldorado: dai transfer failed');
+        }
+        else{
+            require(0==1,'Xeldorado: invalid tokenId');
+        }
+        currentBalanceUpdate();
+        emit creatorRedeemed(address(this), amount, tokenId);
     }
 }

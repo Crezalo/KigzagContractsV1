@@ -15,7 +15,11 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     // will have 2 values-
     // at index: 0 native token price
     // at index: 1 USD token price
-    mapping(address => uint[]) private creatorSaleFee; 
+    mapping(address => uint[]) private creatorSaleFee;
+    // creatorExtraFee allows us to charge addon fees specifically from a given creator
+    // in case we give loan to creator, token sale will have extra deduction for loan recovery
+    // passed on scale of 10000 expressed in % of sale value
+    mapping(address => uint[]) private creatorExtraFee;
     mapping(address => address[]) creatorAdmins; // creator is not added to admins
     address[] public override allCreators;
 
@@ -45,6 +49,7 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
         noOFTokensForDiscount = 50 * 10**18;
     }
 
+    ////////// only feeToSetter can call ///////
     function setFeeTo(address _feeTo) public virtual override {
         require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
         feeTo = _feeTo;
@@ -78,6 +83,18 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
         // set to 50 (i.e. 0.5% on the scale of 10000)
     }
 
+    function updateCreatorExtraFeeNative(address _creator, uint _creatorExtraFeeNative) public virtual override onlyCreatorOrAdmin(_creator) {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        creatorExtraFee[_creator][0] = _creatorExtraFeeNative;
+    }
+    
+    function updateCreatorExtraFeeUSD(address _creator, uint _creatorExtraFeeUSD) public virtual override onlyCreatorOrAdmin(_creator) {
+        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        creatorExtraFee[_creator][1] = _creatorExtraFeeUSD;
+    }
+
+
+    ////////// non admin functions ///////
     modifier onlyCreatorOrAdmin(address _creator) {
         require(msg.sender==_creator || isCreatorAdmin(_creator, msg.sender), 'Xeldorado: only creator or admins');
         _;
@@ -91,6 +108,10 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
         return creatorSaleFee[_creator];
     }
     
+    function getCreatorExtraFee(address _creator) public virtual override view returns(uint[] memory){
+        return creatorExtraFee[_creator];
+    }
+
     function isCreatorAdmin(address _creator, address _admin) public view override returns (bool){
       for (uint i; i < creatorAdmins[_creator].length;i++){
           if (creatorAdmins[_creator][i]==_admin) return true;
@@ -100,8 +121,14 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     
     function newCreator(address _creator, address _dao, address _vault, string memory _name, string memory _symbol, uint _creatorSaleFeeNative, uint _creatorSaleFeeUSD) public virtual override returns(address token) {
         allCreators.push(_creator);
+        
+        // set creator token price in native and usd
         creatorSaleFee[_creator].push(_creatorSaleFeeNative);
         creatorSaleFee[_creator].push(_creatorSaleFeeUSD);
+
+        // initialise extra fee for creator as 0
+        creatorExtraFee[_creator].push(0);
+        creatorExtraFee[_creator].push(0);
 
         // deploying token contract
         token = _createToken(_creator, _name, _symbol);

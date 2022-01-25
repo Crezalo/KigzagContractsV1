@@ -14,6 +14,7 @@ interface IXeldoradoCreatorFactory_LT {
     function creatorVault(address _creator) external view returns(address);
     function creatorDAO(address _creator) external view returns(address);
     function getCreatorSaleFee(address _creator) external view returns(uint[] memory);
+    function getCreatorExtraFee(address _creator) external view returns(uint[] memory);
     function allCreators(uint) external view returns(address);
     function exchangeAdmin() external view returns(address);
     function fee() external view returns(uint);
@@ -46,5 +47,6 @@ interface IXeldoradoCreatorFactory_LT {
     function setDiscount(uint _discount) external;
     function setExchangeToken(address _exchangeToken) external;
     function setNoOFTokensForDiscount(uint _noOFTokensForDiscount) external;
-
+    function updateCreatorExtraFeeNative(address _creator, uint _creatorExtraFeeNative) external;
+    function updateCreatorExtraFeeUSD(address _creator, uint _creatorExtraFeeUSD) external;
 }
