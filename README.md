@@ -1,22 +1,52 @@
 # [Xeldorado Protocol](https://main.xeldorado.live/)
-### Xeldorado - A general purpose Creator Social Token (CST) Protocol that implements Creator Economy using:
+
+![Samrt Contract Flow Diagram](./Images/social_token_development1.png)
+
+### Xeldorado - A general purpose Social Token Protocol to build Creator Economy using 2 types of tokens:
   
-#### 1. Loyalty Tokens
-  Creator tokens are **non-tradable** fixed price tickets to access premium services from creator. It could be exclusive video content, one-on-one intereaction (online/offline), merchandise, or in real world like access to front row seats of Creator's show (if creator is a musician or comedian). Business can also utilise our tokens to reward their loyal customers. **Any Body Can Be A CREATOR**. It is limited only to creator's imagination. 
+#### 1. Loyalty Tokens (Launching soon)
+  These are **non-tradable** fixed price tickets to get exclusive services/products from creator. 
+
+<!-- ![Samrt Contract Flow Diagram](./Images/tickets.svg) -->
+<img src="./Images/tickets.png" width="400" height="250" />
+  
+##### Products/Rewards can be but not limited to:
+  
+  - gated community on discord, telegram
+  
+  - exclusive video content, one-on-one intereaction (online/offline), shoutouts on social media
+  
+  - merchandise
+  
+  - real world use cases like access to front row seats of Creator's show (if creator is a musician or comedian). 
+  
+  - Businesses can also be a creator and reward their loyal customers (token holders) with exclusive products and discounts. This will make their business **Network Effect** driven by creating **sticky customers**.
+
+![Samrt Contract Flow Diagram](./Images/premium.svg)
+
+##### Key Offerings:
 
    - <b>Creator Tokens</b> : fans and followers can buy creator tokens at price fixed by creator or community. These tokens should be treated as vouchers or tickets which can be bought but one cannot sell them back directly. A creator can choose to create subscription by deducting some tokens from holder on regular basis.
 
    - <b>NFT Sale against Creator Token</b> : Creator or community can decide upon price of NFT in creator tokens and list it for sale. 
 
-   - <b>DAO</b> : for Creator community governance. Handles community treasury.
+   - <b>DAO</b> : token holders can take part in creator community governance. Handles creator treasury. 
    
-   - <b>Payment/Allowances</b> : 3 tokens are accepted for buying of Creator Tokens as well as receiving allowances. These are wrapped network's token (like **WETH** for ethereum. **WMATIC** for polygon, **WAVAX** for Avalanche, etc.), **USDC**, **DAI**. Incase user doesn't own wrapped ERC20 version, we will integrate the function calls to wrap the token.
+   - <b>Accepted Payments & Allowances</b> : 3 tokens are accepted for buying of Creator Tokens as well as receiving allowances. These are wrapped network's token (like **WETH** for ethereum. **WMATIC** for polygon, **WAVAX** for Avalanche, etc.), **USDC**, **DAI**. In case user doesn't own wrapped ERC20 version, we will integrate the function calls to wrap the token.
+
+##### Benefits:
+  - Same Creator Token can gives access across a range of products both online and offline.
   
-#### 2. Growth Tokens
+  - Fans/Followers can take part in creator's decision making which takes participation in creator's journey to another level
+
+  - Global nature of blockchain makes cross border ticketting easier.
+
+
+#### 2. Growth Tokens (Need regulatory approval before launch)
   Creator/Community are **Tradable** Social Tokens that offer potential increase in price as Creator/Community grows. Growth Tokens are superior version of Loyalty Tokens. They are traded with in-house AMM and offers:
    - <b>Liquidity Pair of CreatorToken-BaseToken</b> : Gateway between Creator Economy and External World. Creator can choose from a list of options to select best suited BaseToken. For e.g. USDC, DAI, WETH, WBTC, BUSD, etc. 
 
-   - <b>NFTs that are pegged to CreatorToken</b> : Price of 1 NFT will be constant w.r.t. CreatorToken and every time a new NFT is added to the vault same number of CreatorTokens will be minted to ensure the peg. Price of NFT soars when Creator Tokens soars w.r.t. Base Tokens. Secondary Market for NFT allows price to soar further but the ceiling price of NFTs stay constant w.r.t. Creator Tokens.
+   - <b>NFTs that are pegged to CreatorToken</b> : Price of 1 NFT will be constant w.r.t. CreatorToken and every time a new NFT is added to the vault same number of CreatorTokens will be minted to ensure the peg. Price of NFT soars when Creator Tokens soars w.r.t. Base Tokens. Secondary Market for NFT allows price to soar further but the floor price of NFTs stay constant w.r.t. Creator Tokens. At this price NFT holder can sell to the vault.
 
    - <b>Bank</b> : for NFT backed lending borrowing of Creator Tokens
 
@@ -24,7 +54,58 @@
 
 Creator/Community can decide to opt for anyone of them.
 
-## Features 
+## Network Expansion Plans
+
+We plan to target low gas fee EVM compatible chains first since the same smart contracts will work it is just a matter of deployment and updating the webapp.
+
+Currently, each network will be exclusive of others. Creator can be on multiple networks but there will be no cross network integration.
+
+We don't have any personal preference but Creators are advised to choose networks with high transaction volumes and low gas fees first.  
+
+### Round 1 (4 months):
+
+- [ ] First we will deploy to 6 netowrk's testnet for 1-2 month, meanwhile onboarding creators and building community, 
+
+- [ ] and then to mainnet.
+
+Top EVM compatible chains:
+1. Avalanche 
+2. Polygon
+3. BSC 
+4. Fantom  
+5. Harmony 
+6. Moonriver, Moonbeam (Polkadot Parachains)
+
+### Round 2 (1 months): 
+
+- Due to high number of transactions and low average transaction value, we believe Ethereum is not the best for our protocol but still this step will help get high end Ethereum network users.
+
+- Also profits generated from Round 1 will help pay gas fee for contract deployment.
+
+7. Ethereum
+
+### Round 3 (2 months):
+
+Remaining EVM compatible chains:
+
+Top EVM compatible chains:
+8. Arbitrum 
+9. Optimism 
+10. xDai
+11. OKEx 
+12. HECO
+13. Solana (Using Solang Compiler or maybe Neon)
+
+### Round 4 (5 months):
+   
+We further plan to expand to EVM non-compatible networks depending on user demand:
+
+13. Solana 
+14. Terra 
+15. Algorand 
+16. Cardano 
+
+## Functionality
 
 ### 1. Loyalty Tokens
 - [x] <b>Creator Token</b>
@@ -32,8 +113,10 @@ Creator/Community can decide to opt for anyone of them.
 
 - [x] <b>Creator DAO</b>
   - [x] Token holders can make proposals 
-  - [x] Creator/Community can airdrop Creator Tokens to any account since these tokens cannot be sold and only be used to access premium stuff no need risks of price drop involded.
+  - [x] Creator/Community can airdrop Creator Tokens to any account since these tokens cannot be sold and only be used to access premium stuff, creator can airdrop into wallet giving a fan free access to creator's products.
   - [x] Creator/Community can add managers and those managers will be given allowances in base tokens / payment tokens received by the DAO contract on Creator Token sale. Using these allowances they can pay folks/employees, they hire, for specific task either on Pay Per Task basis or monthly salaries. Managers can transfer from their allowances to the employee's allowance value. 
+  - [x] If creator is a person/business then creator can redeem any amount of base tokens/payment tokens from DAO since it his/her earning. However, it is advisable to keep leave some amount for allowances. 
+  - [x] In case creator is a community with no central entity then direct/unapproved redeem is not available and every token redeemed goes through allowances voting process.
   - [x] 2 types of proposals 
     - [x] Allowances Proposals to decide amount allocated per manager. Single proposal can handle multiple managers' allowances.
     - [x] General Proposal will contain link to their DAO Forum's proposal page where detailed discussions can take place. Results of these proposals will be acted upon by community members in good faith.
@@ -91,47 +174,9 @@ Creator/Community can decide to opt for anyone of them.
 - [ ] <b>External Contract Functions</b>
   - [ ] 2 NFTs of different creator with same BaseTokens can be swapped with small fees 
   - [ ] If someone owns an NFT, you can buy it for premium by placing a bid (Auction smart contract will be placed separately) 
-  - [ ] Base Token Pairs: Use a Curve kind of multi token pairs for BaseTokens for swap. This will help NFTs of creator that don't have same base token. Liquidity will be added by us using a small fraction of profit being earnt in BaseTokens. Swap in these pools will have no fees. 
-<hr/>
-
-## Smart Contracts Flow Diagram
-
-#### 1. Growth Tokens
-![Samrt Contract Flow Diagram](./Images/XeldoradoCoreSmartContractDesign.png)
-<hr/>
-
-#### 2. Loyalty Tokens
-![Samrt Contract Flow Diagram](./Images/XeldoradoCoreSmartContractDesign_LT.png)
-
-## Network Expansion Plans
-
-We plan to fist expand to all the networks that are EVM compatible and have significantly low gas fees:
-
-1. Polygon
-2. BSC 
-3. Avalanche 
-4. Fantom 
-5. Arbitrum 
-6. Optimism 
-7. MoonRiver 
-8. xDai 
-9. Harmony 
-10. Polkadot
-11. Solana (Using Solang Compiler or maybe Neon)
-   
-We further plan to expand to EVM non-compatible networks depending on user demand:
-
-1. Solana 
-2. Algorand 
-3. Cardano 
-4. Terra 
-
+  - [ ] Base Token Pairs: Use a Curve kind of multi token pairs for BaseTokens for swap. This will help NFTs of creator that don't have same base token. Liquidity will be added by us using a small fraction of profit being earnt in BaseTokens. Swap in these pools will have no fees.
 
 ## Documentation
-
-<!-- Visual Explanations for protocol: [Understand](https://main.xeldorado.live/index.html#xeldoradoprotocol) -->
-
-<!-- <a href="https://main.xeldorado.live/index.html#xeldoradoprotocol" target="_blank"><img src="https://main.xeldorado.live/images/logo.png" width="150" height="30"/></a> -->
 
 White paper & Docs for Xeldorado Protocol is currently under development.
 
