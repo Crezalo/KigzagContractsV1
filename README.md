@@ -1,4 +1,4 @@
-# [Kigzag Protocol](https://main.Kigzag.live/)
+# [Kigzag Protocol](https://main.xeldorado.live/)
 
 ![Samrt Contract Flow Diagram](./Images/social_token_development1.png)
 
@@ -204,10 +204,10 @@ The primary license for Kigzag Contracts V1 is the Business Source License 1.1 (
 
 ## Community
 
-<a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://main.Kigzag.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://t.me/Kigzag" target="_blank"><img src="https://main.Kigzag.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://twitter.com/KigzagLabs" target="_blank"><img src="https://main.Kigzag.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://www.reddit.com/r/Kigzag_/" target="_blank"><img src="https://main.Kigzag.live/images/reddit.png" width="80" height="80"/></a>
+<a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://main.xeldorado.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://t.me/xeldorado" target="_blank"><img src="https://main.xeldorado.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://twitter.com/XeldoradoLabs" target="_blank"><img src="https://main.xeldorado.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://www.reddit.com/r/Xeldorado_/" target="_blank"><img src="https://main.xeldorado.live/images/reddit.png" width="80" height="80"/></a>
 
 ## Responsible disclosure
 
