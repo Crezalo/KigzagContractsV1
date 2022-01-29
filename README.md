@@ -217,7 +217,7 @@ In case you discover a vulnerability, we would like to know about it immediately
 
 If you discover a vulnerability, please do the following: 
 
-    E-mail your findings to Kigzag.nft@gmail.com; 
+    E-mail your findings to xeldoradoprotocol@gmail.com; 
 
     Do not take advantage of the vulnerability or problem you have discovered; 
 
