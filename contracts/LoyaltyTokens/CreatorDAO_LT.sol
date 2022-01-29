@@ -2,7 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "./interfaces/ICreatorToken_LT.sol";
-import "./interfaces/IXeldoradoCreatorFactory_LT.sol";
+import "./interfaces/IKigzagCreatorFactory_LT.sol";
 import "./interfaces/ICreatorDAO_LT.sol";
 import "../libraries/SafeMath.sol";
 
@@ -56,44 +56,44 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     address creatorfactory;
 
     modifier lock() {
-        require(unlocked == 1, 'Xeldorado: LOCKED');
+        require(unlocked == 1, 'Kigzag: LOCKED');
         unlocked = 0;
         _;
         unlocked = 1;
     }
 
     modifier onlyCreatorOrAdmins() {
-        require(msg.sender==creator || IXeldoradoCreatorFactory_LT(creatorfactory).isCreatorAdmin(creator, msg.sender),'Xeldorado: only creator or admins');
+        require(msg.sender==creator || IKigzagCreatorFactory_LT(creatorfactory).isCreatorAdmin(creator, msg.sender),'Kigzag: only creator or admins');
         _;
     }
 
     modifier onlyHolders() {
-        require(IERC20(token).balanceOf(msg.sender)>0 || msg.sender==creator,'Xeldorado: Only holders'); //in case creator might have no tokens
+        require(IERC20(token).balanceOf(msg.sender)>0 || msg.sender==creator,'Kigzag: Only holders'); //in case creator might have no tokens
         _;
     }
 
     modifier notVoted(uint proposalId) {
-        require(proposalIdToProposalVoteData[proposalId].voterValue[msg.sender]==0,'Xeldorado: already voted');
+        require(proposalIdToProposalVoteData[proposalId].voterValue[msg.sender]==0,'Kigzag: already voted');
         _;
     }
 
     // use to ensure voting is ongoing for a proposal
     modifier votingOver(uint proposalId) {
-        require(block.timestamp.sub(proposalIdToProposalData[proposalId].startTimeStamp)<(votingDuration),'Xeldorado: voting duration over');
+        require(block.timestamp.sub(proposalIdToProposalData[proposalId].startTimeStamp)<(votingDuration),'Kigzag: voting duration over');
         _;
     } 
 
     // use to ensure voting is complete for a proposal
     modifier votingNotOver(uint proposalId) {
-        require(block.timestamp.sub(proposalIdToProposalData[proposalId].startTimeStamp)>(votingDuration),'Xeldorado: voting duration not over');
+        require(block.timestamp.sub(proposalIdToProposalData[proposalId].startTimeStamp)>(votingDuration),'Kigzag: voting duration not over');
         _;
     } 
 
     // use to ensure TotalBalance of DAO >= Sum(Allowances)
     modifier checkBalanceOverFlow(){
         _;
-        require(nativeTokenBalance>=nativeTotalAllowances,'Xeldorado: Native Approved Amount OverfLow');
-        require(usdBalance>=usdTotalAllowances,'Xeldorado: USD Approved Amount OverfLow');
+        require(nativeTokenBalance>=nativeTotalAllowances,'Kigzag: Native Approved Amount OverfLow');
+        require(usdBalance>=usdTotalAllowances,'Kigzag: USD Approved Amount OverfLow');
     }
 
     constructor() {
@@ -103,7 +103,7 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
 
     // only creator factory can initialise
     function initialise(address _creator, uint _votingDuration, address _token) public virtual override {
-        require(token==address(0),'Xeldorado: initialised');
+        require(token==address(0),'Kigzag: initialised');
         creatorfactory = msg.sender; // function called via creator factory
         creator = _creator; 
         unlocked = 1;
@@ -144,10 +144,10 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
 
     function currentBalanceUpdate() public virtual override {
         // balance of network/native token
-        nativeTokenBalance = IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).networkWrappedToken()).balanceOf(address(this));
+        nativeTokenBalance = IERC20(IKigzagCreatorFactory_LT(creatorfactory).networkWrappedToken()).balanceOf(address(this));
 
         // balance of usdc + dai
-        usdBalance = IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).usdc()).balanceOf(address(this)).add(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).dai()).balanceOf(address(this)));
+        usdBalance = IERC20(IKigzagCreatorFactory_LT(creatorfactory).usdc()).balanceOf(address(this)).add(IERC20(IKigzagCreatorFactory_LT(creatorfactory).dai()).balanceOf(address(this)));
     }
 
     // only creator oe admins can call
@@ -189,7 +189,7 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     // for this proposedAllowancesAmount  for a member is shifted to generalProposalData
     // allowances will happen in base tokens
     function allowancesProposal(uint[] memory amount, address[] memory managers, bool _nativeAllowance) public virtual override onlyHolders lock {
-        require(managers.length==amount.length,'Xeldorado: unbalanced array');
+        require(managers.length==amount.length,'Kigzag: unbalanced array');
         proposalIdToProposalData[proposals].proposer = msg.sender;
         proposalIdToProposalData[proposals].category = 1;
         proposalIdToProposalData[proposals].choices = 2;
@@ -220,7 +220,7 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     // works for all 2 categories of proposal: Allowances, General Purpose
     // for Allowances: 1: no and 2: yes
     function generalProposalVote(uint proposalId, uint choice) public virtual override votingOver(proposalId) onlyHolders notVoted(proposalId) lock {
-        require(choice>=1 && choice<=proposalIdToProposalData[proposalId].choices,'Xeldorado: out of choice');
+        require(choice>=1 && choice<=proposalIdToProposalData[proposalId].choices,'Kigzag: out of choice');
         proposalIdToProposalVoteData[proposalId].voterValue[msg.sender] = choice;
         proposalIdToProposalVoteData[proposalId].voteCount[choice] += 1;
         proposalIdToProposalVoteData[proposalId].votersTokenCount[choice] += IERC20(token).balanceOf(msg.sender);
@@ -248,7 +248,7 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     // hence allowances for a manager get incremented 
     // indicating total amount the granted manager can redeem or further allocate to a resource
     function updateManagerAllowances(uint proposalId) public virtual override votingNotOver(proposalId) lock checkBalanceOverFlow {
-        require(proposalStatus(proposalId)==2,'Xeldorado: proposal not passed');
+        require(proposalStatus(proposalId)==2,'Kigzag: proposal not passed');
         uint manCount = proposalIdToProposalData[proposalId].managers.length;
         for(uint i;i<manCount;i++)
         {
@@ -271,12 +271,12 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     function setAllowances(address[] memory _to, uint[] memory _amount, bool _nativeAllowance) public virtual override lock {
         for(uint i;i<_amount.length;i++){
             if(_nativeAllowance) {
-                require(_amount[i]<nativeTokenAllowances[msg.sender],'Xeldorado: not enough allowances');
+                require(_amount[i]<nativeTokenAllowances[msg.sender],'Kigzag: not enough allowances');
                 nativeTokenAllowances[msg.sender] -= _amount[i];
                 nativeTokenAllowances[_to[i]] += _amount[i];
             }
             else{
-                require(_amount[i]<usdAllowances[msg.sender],'Xeldorado: not enough allowances');
+                require(_amount[i]<usdAllowances[msg.sender],'Kigzag: not enough allowances');
                 usdAllowances[msg.sender] -= _amount[i];
                 usdAllowances[_to[i]] += _amount[i];
             }
@@ -287,29 +287,29 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     // batch send allowances
     // tokenId -> 1 for nativeToken, 2 for usdc, 3 for dai
     function sendAllowances(address[] memory members, uint[] memory amount, uint[] memory tokenId) public virtual override lock {
-        require(members.length==amount.length && amount.length==tokenId.length,'Xeldorado: unbalanced array');
+        require(members.length==amount.length && amount.length==tokenId.length,'Kigzag: unbalanced array');
         for(uint i;i<members.length;i++)
         {
             if(tokenId[i]==1){ // native token
-                require(amount[i] <= nativeTokenAllowances[members[i]], 'Xeldorado: amount exceeds grant');
-                require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).networkWrappedToken()).transfer(members[i], amount[i]), 'Xeldorado: grant transfer failed');
+                require(amount[i] <= nativeTokenAllowances[members[i]], 'Kigzag: amount exceeds grant');
+                require(IERC20(IKigzagCreatorFactory_LT(creatorfactory).networkWrappedToken()).transfer(members[i], amount[i]), 'Kigzag: grant transfer failed');
                 nativeTokenAllowances[members[i]] -= amount[i];
                 nativeTotalAllowances -= amount[i];
             }
             else if(tokenId[i]==2){ // usdc
-                require(amount[i] <= usdAllowances[members[i]], 'Xeldorado: amount exceeds grant');
-                require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).usdc()).transfer(members[i], amount[i]), 'Xeldorado: grant transfer failed');
+                require(amount[i] <= usdAllowances[members[i]], 'Kigzag: amount exceeds grant');
+                require(IERC20(IKigzagCreatorFactory_LT(creatorfactory).usdc()).transfer(members[i], amount[i]), 'Kigzag: grant transfer failed');
                 usdAllowances[members[i]] -= amount[i];
                 usdTotalAllowances -= amount[i];
             }
             else if(tokenId[i]==3){ // dai
-                require(amount[i] <= usdAllowances[members[i]], 'Xeldorado: amount exceeds grant');
-                require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).dai()).transfer(members[i], amount[i]), 'Xeldorado: grant transfer failed');
+                require(amount[i] <= usdAllowances[members[i]], 'Kigzag: amount exceeds grant');
+                require(IERC20(IKigzagCreatorFactory_LT(creatorfactory).dai()).transfer(members[i], amount[i]), 'Kigzag: grant transfer failed');
                 usdAllowances[members[i]] -= amount[i];
                 usdTotalAllowances -= amount[i];
             }
             else{
-                require(0==1,'Xeldorado: invalid tokenId');
+                require(0==1,'Kigzag: invalid tokenId');
             }
             emit allowancesRedeemed(address(this), amount[i], members[i], tokenId[i]);
         }
@@ -319,25 +319,25 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     // only allowance receving member can call
     function redeemAllowances(uint amount, uint tokenId) public virtual override lock {
         if(tokenId==1){ // native token
-            require(amount <= nativeTokenAllowances[msg.sender], 'Xeldorado: amount exceeds grant');
-            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).networkWrappedToken()).transfer(msg.sender, amount), 'Xeldorado: grant transfer failed');
+            require(amount <= nativeTokenAllowances[msg.sender], 'Kigzag: amount exceeds grant');
+            require(IERC20(IKigzagCreatorFactory_LT(creatorfactory).networkWrappedToken()).transfer(msg.sender, amount), 'Kigzag: grant transfer failed');
             nativeTokenAllowances[msg.sender] -= amount;
             nativeTotalAllowances -= amount;
         }
         else if(tokenId==2){ // usdc
-            require(amount <= usdAllowances[msg.sender], 'Xeldorado: amount exceeds grant');
-            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).usdc()).transfer(msg.sender, amount), 'Xeldorado: grant transfer failed');
+            require(amount <= usdAllowances[msg.sender], 'Kigzag: amount exceeds grant');
+            require(IERC20(IKigzagCreatorFactory_LT(creatorfactory).usdc()).transfer(msg.sender, amount), 'Kigzag: grant transfer failed');
             usdAllowances[msg.sender] -= amount;
             usdTotalAllowances -= amount;
         }
         else if(tokenId==3){ // dai
-            require(amount <= usdAllowances[msg.sender], 'Xeldorado: amount exceeds grant');
-            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).dai()).transfer(msg.sender, amount), 'Xeldorado: grant transfer failed');
+            require(amount <= usdAllowances[msg.sender], 'Kigzag: amount exceeds grant');
+            require(IERC20(IKigzagCreatorFactory_LT(creatorfactory).dai()).transfer(msg.sender, amount), 'Kigzag: grant transfer failed');
             usdAllowances[msg.sender] -= amount;
             usdTotalAllowances -= amount;
         }
         else{
-            require(0==1,'Xeldorado: invalid tokenId');
+            require(0==1,'Kigzag: invalid tokenId');
         }
         emit allowancesRedeemed(address(this), amount, msg.sender, tokenId);
         currentBalanceUpdate();
@@ -346,21 +346,21 @@ contract CreatorDAO_LT is ICreatorDAO_LT{
     // only creator can call
     // comment this function in case of community run economy
     function redeemFromTreasury(uint amount, uint tokenId) public virtual override lock checkBalanceOverFlow {
-        require(msg.sender==creator,'Xeldorado: only creator allowed');
+        require(msg.sender==creator,'Kigzag: only creator allowed');
         if(tokenId==1){ // native token
-            require(amount <= nativeTokenBalance, 'Xeldorado: amount balance');
-            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).networkWrappedToken()).transfer(msg.sender, amount), 'Xeldorado: native token transfer failed');
+            require(amount <= nativeTokenBalance, 'Kigzag: amount balance');
+            require(IERC20(IKigzagCreatorFactory_LT(creatorfactory).networkWrappedToken()).transfer(msg.sender, amount), 'Kigzag: native token transfer failed');
         }
         else if(tokenId==2){ // usdc
-            require(amount <= usdBalance, 'Xeldorado: amount balance');
-            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).usdc()).transfer(msg.sender, amount), 'Xeldorado: usdc transfer failed');
+            require(amount <= usdBalance, 'Kigzag: amount balance');
+            require(IERC20(IKigzagCreatorFactory_LT(creatorfactory).usdc()).transfer(msg.sender, amount), 'Kigzag: usdc transfer failed');
         }
         else if(tokenId==3){ // dai
-            require(amount <= usdBalance, 'Xeldorado: amount balance');
-            require(IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).dai()).transfer(msg.sender, amount), 'Xeldorado: dai transfer failed');
+            require(amount <= usdBalance, 'Kigzag: amount balance');
+            require(IERC20(IKigzagCreatorFactory_LT(creatorfactory).dai()).transfer(msg.sender, amount), 'Kigzag: dai transfer failed');
         }
         else{
-            require(0==1,'Xeldorado: invalid tokenId');
+            require(0==1,'Kigzag: invalid tokenId');
         }
         currentBalanceUpdate();
         emit creatorRedeemed(address(this), amount, tokenId);

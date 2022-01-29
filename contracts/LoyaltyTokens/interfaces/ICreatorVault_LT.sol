@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
-interface IXeldoradoVault_LT {
+interface ICreatorVault_LT {
     event NFTadded(address _nft, uint _tokenId, uint vaultid);
     event NFTListed(uint vaultId, uint price);
     event NFTListingUpdate(uint vaultId, uint price);
@@ -20,7 +20,8 @@ interface IXeldoradoVault_LT {
     // only creator factory can initialise
     function initialise(address _creator, string memory _name, string memory _symbol, address _token) external;
 
-    function buyNFT(address _to, uint[] memory _vaultIds) external;
+    // caller will be buyer
+    function buyNFT(uint[] memory _vaultIds) external;
 
     // only creator or admins can call
     function mintNFTUsingVaultContract(string[] memory _tokenURI) external;

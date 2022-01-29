@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity ^0.8.4;
 
-interface IXeldoradoCreatorFactory_LT {
+interface IKigzagCreatorFactory_LT {
     event CreatorVaultCreated(address vault, address creator);
     event CreatorTokenCreated(address token, address creator);
     event CreatorDAOCreated(address cdao, address creator);

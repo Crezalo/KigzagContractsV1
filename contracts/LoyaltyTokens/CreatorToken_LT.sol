@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interfaces/ICreatorToken_LT.sol";
 import "./interfaces/ICreatorDAO_LT.sol";
-import "./interfaces/IXeldoradoCreatorFactory_LT.sol";
+import "./interfaces/IKigzagCreatorFactory_LT.sol";
 import "../libraries/SafeMath.sol";
 
 contract CreatorToken_LT is ERC20, ICreatorToken_LT {
@@ -16,14 +16,14 @@ contract CreatorToken_LT is ERC20, ICreatorToken_LT {
     address public override dao;
 
     modifier lock() {
-        require(unlocked == 1, 'Xeldorado: LOCKED');
+        require(unlocked == 1, 'Kigzag: LOCKED');
         unlocked = 0;
         _;
         unlocked = 1;
     }
 
     modifier onlyHolders() {
-        require(ICreatorToken_LT(address(this)).balanceOf(msg.sender) > 0 , 'Xeldorado: not a token owner');
+        require(ICreatorToken_LT(address(this)).balanceOf(msg.sender) > 0 , 'Kigzag: not a token owner');
         _;
     }
 
@@ -34,8 +34,8 @@ contract CreatorToken_LT is ERC20, ICreatorToken_LT {
     }
 
     function initialize(address _dao) public virtual override {
-        require(msg.sender==creatorfactory,'Xeldorado: only creator factory allowed');
-        require(dao==address(0),'Xeldorado: DAO already added');
+        require(msg.sender==creatorfactory,'Kigzag: only creator factory allowed');
+        require(dao==address(0),'Kigzag: DAO already added');
         dao = _dao;
     }
 
@@ -46,7 +46,7 @@ contract CreatorToken_LT is ERC20, ICreatorToken_LT {
     }
     
     function mintTokens(address _to, uint _amount) public virtual override {
-        require(msg.sender==dao,'Xeldorado: only dao can mint tokens');
+        require(msg.sender==dao,'Kigzag: only dao can mint tokens');
         _mint(_to,_amount);
         emit tokensMinted(address(this), _amount, _to);
     }
@@ -63,27 +63,27 @@ contract CreatorToken_LT is ERC20, ICreatorToken_LT {
         uint discount;
         uint total;
         uint tokenId;
-        if(IXeldoradoCreatorFactory_LT(creatorfactory).noOFTokensForDiscount() <= IERC20(IXeldoradoCreatorFactory_LT(creatorfactory).exchangeToken()).balanceOf(msg.sender)) {
-            discount = IXeldoradoCreatorFactory_LT(creatorfactory).discount();
+        if(IKigzagCreatorFactory_LT(creatorfactory).noOFTokensForDiscount() <= IERC20(IKigzagCreatorFactory_LT(creatorfactory).exchangeToken()).balanceOf(msg.sender)) {
+            discount = IKigzagCreatorFactory_LT(creatorfactory).discount();
         }
 
-        if(_basetoken == IXeldoradoCreatorFactory_LT(creatorfactory).networkWrappedToken()){
-            total = _amount.mul(IXeldoradoCreatorFactory_LT(creatorfactory).getCreatorSaleFee(creator)[0]);
+        if(_basetoken == IKigzagCreatorFactory_LT(creatorfactory).networkWrappedToken()){
+            total = _amount.mul(IKigzagCreatorFactory_LT(creatorfactory).getCreatorSaleFee(creator)[0]);
         }
 
-        else if(_basetoken == IXeldoradoCreatorFactory_LT(creatorfactory).usdc() || _basetoken == IXeldoradoCreatorFactory_LT(creatorfactory).dai()){
-            total = _amount.mul(IXeldoradoCreatorFactory_LT(creatorfactory).getCreatorSaleFee(creator)[1]);
+        else if(_basetoken == IKigzagCreatorFactory_LT(creatorfactory).usdc() || _basetoken == IKigzagCreatorFactory_LT(creatorfactory).dai()){
+            total = _amount.mul(IKigzagCreatorFactory_LT(creatorfactory).getCreatorSaleFee(creator)[1]);
             tokenId=1;
         }
 
         else{
-            require(0==1, 'Xeldorado: invlaid basetoken');
+            require(0==1, 'Kigzag: invlaid basetoken');
         }
 
         // totalFee = total * (exchangeFee + extraFee - exchangeTokenDiscount)/10000
-        uint totalFee = calculateFee(total, IXeldoradoCreatorFactory_LT(creatorfactory).fee().add(IXeldoradoCreatorFactory_LT(creatorfactory).getCreatorExtraFee(creator)[tokenId]).sub(discount));
-        require(IERC20(_basetoken).transferFrom(msg.sender, dao, total.sub(totalFee)),'Xeldorado: base token transfer failed');
-        require(IERC20(_basetoken).transferFrom(msg.sender, IXeldoradoCreatorFactory_LT(creatorfactory).feeTo(), totalFee),'Xeldorado: base token transfer failed');
+        uint totalFee = calculateFee(total, IKigzagCreatorFactory_LT(creatorfactory).fee().add(IKigzagCreatorFactory_LT(creatorfactory).getCreatorExtraFee(creator)[tokenId]).sub(discount));
+        require(IERC20(_basetoken).transferFrom(msg.sender, dao, total.sub(totalFee)),'Kigzag: base token transfer failed');
+        require(IERC20(_basetoken).transferFrom(msg.sender, IKigzagCreatorFactory_LT(creatorfactory).feeTo(), totalFee),'Kigzag: base token transfer failed');
         _mint(msg.sender, _amount.mul(10**18));
         ICreatorDAO_LT(dao).currentBalanceUpdate();
     }

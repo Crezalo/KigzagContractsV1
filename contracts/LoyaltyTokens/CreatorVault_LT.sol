@@ -3,11 +3,11 @@ pragma solidity ^0.8.4;
 
 import './CreatorNFT_LT.sol';
 import './interfaces/ICreatorToken_LT.sol';
-import './interfaces/IXeldoradoVault_LT.sol';
-import './interfaces/IXeldoradoCreatorFactory_LT.sol';
+import './interfaces/ICreatorVault_LT.sol';
+import './interfaces/IKigzagCreatorFactory_LT.sol';
 import '../libraries/SafeMath.sol';
 
-contract XeldoradoVault_LT is IXeldoradoVault_LT{
+contract CreatorVault_LT is ICreatorVault_LT{
     using SafeMath  for uint;
     
     address public override creator;
@@ -27,14 +27,14 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
     address creatorfactory;
     
     modifier lock() {
-        require(unlocked == 1, 'Xeldorado: LOCKED');
+        require(unlocked == 1, 'Kigzag: LOCKED');
         unlocked = 0;
         _;
         unlocked = 1;
     }
 
     modifier onlyCreatorOrAdmins() {
-        require(msg.sender==creator || IXeldoradoCreatorFactory_LT(creatorfactory).isCreatorAdmin(creator, msg.sender),'Xeldorado: only creator or admins');
+        require(msg.sender==creator || IKigzagCreatorFactory_LT(creatorfactory).isCreatorAdmin(creator, msg.sender),'Kigzag: only creator or admins');
         _;
     }
     
@@ -46,7 +46,7 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
 
     // only creator factory can initialise
     function initialise(address _creator, string memory _name, string memory _symbol, address _token) public virtual override {
-        require(token==address(0),'Xeldorado: initialised');
+        require(token==address(0),'Kigzag: initialised');
         creator = _creator; // Creator 
         creatorfactory = msg.sender; // function called via creator factory
         nftcontract = new CreatorNFT_LT(_creator,_name,_symbol);
@@ -68,10 +68,10 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
     }
 
     function listNFTsForSale(uint[] memory vaultIds, uint[] memory priceInCreatorTokenss) public virtual override onlyCreatorOrAdmins lock {
-        require(vaultIds.length==priceInCreatorTokenss.length,'Xeldorado: unbalanced array');
+        require(vaultIds.length==priceInCreatorTokenss.length,'Kigzag: unbalanced array');
         for(uint i=0;i<vaultIds.length;i++){
-            require(vaultIdTonftPrice[vaultIds[i]] == 0 ,'Xeldorado: already listed');
-            require(IERC721(vaultIdTonftContract[vaultIds[i]]).ownerOf(vaultIdToTokenId[vaultIds[i]]) == address(this) ,'Xeldorado: already sold');
+            require(vaultIdTonftPrice[vaultIds[i]] == 0 ,'Kigzag: already listed');
+            require(IERC721(vaultIdTonftContract[vaultIds[i]]).ownerOf(vaultIdToTokenId[vaultIds[i]]) == address(this) ,'Kigzag: already sold');
             vaultIdTonftPrice[vaultIds[i]] = priceInCreatorTokenss[i];
             allOnSaleNFTs +=1;
             emit NFTListed(vaultIds[i], priceInCreatorTokenss[i]);
@@ -79,10 +79,10 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
     }
 
     function updateNFTPrice(uint[] memory vaultIds, uint[] memory priceInCreatorTokenss) public virtual override onlyCreatorOrAdmins lock {
-        require(vaultIds.length==priceInCreatorTokenss.length,'Xeldorado: unbalanced array');
+        require(vaultIds.length==priceInCreatorTokenss.length,'Kigzag: unbalanced array');
         for(uint i=0;i<vaultIds.length;i++){
-            require(vaultIdTonftPrice[vaultIds[i]] != 0 ,'Xeldorado: not listed');
-            require(IERC721(vaultIdTonftContract[vaultIds[i]]).ownerOf(vaultIdToTokenId[vaultIds[i]]) == address(this), 'Xeldorado: Already bought!');
+            require(vaultIdTonftPrice[vaultIds[i]] != 0 ,'Kigzag: not listed');
+            require(IERC721(vaultIdTonftContract[vaultIds[i]]).ownerOf(vaultIdToTokenId[vaultIds[i]]) == address(this), 'Kigzag: Already bought!');
             vaultIdTonftPrice[vaultIds[i]] = priceInCreatorTokenss[i];
             if(priceInCreatorTokenss[i] == 0){
                 allOnSaleNFTs -= 1;
@@ -91,13 +91,13 @@ contract XeldoradoVault_LT is IXeldoradoVault_LT{
         }
     }
     
-    function buyNFT(address _to, uint[] memory _vaultIds) public virtual override lock {
+    function buyNFT(uint[] memory _vaultIds) public virtual override lock {
         for(uint i;i<_vaultIds.length;i++)
         {
-            require(IERC721(vaultIdTonftContract[_vaultIds[i]]).ownerOf(vaultIdToTokenId[_vaultIds[i]]) == address(this), 'Xeldorado: Already bought!');
-            require(vaultIdTonftPrice[_vaultIds[i]]!=0,'Xeldorado: not for sale');
-            IERC721(vaultIdTonftContract[_vaultIds[i]]).transferFrom(address(this), _to, vaultIdToTokenId[_vaultIds[i]]);
-            ICreatorToken_LT(token).transferFrom(_to, address(this), vaultIdTonftPrice[_vaultIds[i]]);
+            require(IERC721(vaultIdTonftContract[_vaultIds[i]]).ownerOf(vaultIdToTokenId[_vaultIds[i]]) == address(this), 'Kigzag: Already bought!');
+            require(vaultIdTonftPrice[_vaultIds[i]]!=0,'Kigzag: not for sale');
+            IERC721(vaultIdTonftContract[_vaultIds[i]]).transferFrom(address(this), msg.sender, vaultIdToTokenId[_vaultIds[i]]);
+            ICreatorToken_LT(token).transferFrom(msg.sender, address(this), vaultIdTonftPrice[_vaultIds[i]]);
             ICreatorToken_LT(token).burnMyTokens(ICreatorToken_LT(token).balanceOf(address(this)));
             allSoldNFTs += 1;
             allOnSaleNFTs -= 1;

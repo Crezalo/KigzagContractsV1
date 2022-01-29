@@ -2,11 +2,11 @@
 pragma solidity ^0.8.4;
 
 import './CreatorToken_LT.sol';
-import './interfaces/IXeldoradoCreatorFactory_LT.sol';
+import './interfaces/IKigzagCreatorFactory_LT.sol';
 import './interfaces/ICreatorDAO_LT.sol';
-import './interfaces/IXeldoradoVault_LT.sol';
+import './interfaces/ICreatorVault_LT.sol';
 
-contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
+contract KigzagCreatorFactory_LT is IKigzagCreatorFactory_LT{
     mapping(address => address) public override creatorToken;
     mapping(address => address) public override creatorVault;
     mapping(address => address) public override creatorDAO;
@@ -51,52 +51,52 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
 
     ////////// only feeToSetter can call ///////
     function setFeeTo(address _feeTo) public virtual override {
-        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Kigzag: FORBIDDEN');
         feeTo = _feeTo;
     }
 
     function setFeeToSetter(address _feeToSetter) public virtual override {
-        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Kigzag: FORBIDDEN');
         feeToSetter = _feeToSetter;
     }
     
     function setFee(uint _fee) public virtual override {
-        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Kigzag: FORBIDDEN');
         fee = _fee;
         // set to 50 (i.e. 0.5% on the scale of 10000)
     }
     
     function setDiscount(uint _discount) public virtual override {
-        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Kigzag: FORBIDDEN');
         discount = _discount;
         // set to 50 (i.e. 0.5% on the scale of 10000)
     }
 
     function setExchangeToken(address _exchangeToken) public virtual override {
-        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Kigzag: FORBIDDEN');
         exchangeToken = _exchangeToken;
     }
     
     function setNoOFTokensForDiscount(uint _noOFTokensForDiscount) public virtual override {
-        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'Kigzag: FORBIDDEN');
         noOFTokensForDiscount = _noOFTokensForDiscount;
         // set to 50 (i.e. 0.5% on the scale of 10000)
     }
 
-    function updateCreatorExtraFeeNative(address _creator, uint _creatorExtraFeeNative) public virtual override onlyCreatorOrAdmin(_creator) {
-        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+    function updateCreatorExtraFeeNative(address _creator, uint _creatorExtraFeeNative) public virtual override {
+        require(msg.sender == feeToSetter, 'Kigzag: FORBIDDEN');
         creatorExtraFee[_creator][0] = _creatorExtraFeeNative;
     }
     
-    function updateCreatorExtraFeeUSD(address _creator, uint _creatorExtraFeeUSD) public virtual override onlyCreatorOrAdmin(_creator) {
-        require(msg.sender == feeToSetter, 'Xeldorado: FORBIDDEN');
+    function updateCreatorExtraFeeUSD(address _creator, uint _creatorExtraFeeUSD) public virtual override {
+        require(msg.sender == feeToSetter, 'Kigzag: FORBIDDEN');
         creatorExtraFee[_creator][1] = _creatorExtraFeeUSD;
     }
 
 
     ////////// non admin functions ///////
     modifier onlyCreatorOrAdmin(address _creator) {
-        require(msg.sender==_creator || isCreatorAdmin(_creator, msg.sender), 'Xeldorado: only creator or admins');
+        require(msg.sender==_creator || isCreatorAdmin(_creator, msg.sender), 'Kigzag: only creator or admins');
         _;
     }
 
@@ -141,7 +141,7 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     }
 
     function _createToken(address _creator, string memory _name, string memory _symbol) internal returns (address token){
-        require(creatorToken[_creator] == address(0),'Xeldorado: Token exist');
+        require(creatorToken[_creator] == address(0),'Kigzag: Token exist');
         CreatorToken_LT ctoken = new CreatorToken_LT(_creator, _name, _symbol);
         token = address(ctoken);
         creatorToken[_creator] = token;
@@ -149,7 +149,7 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     }
 
     function _initialiseDAO(address dao, address _creator, address _token) internal {
-        require(creatorDAO[_creator] == address(0),'Xeldorado: DAO exist');
+        require(creatorDAO[_creator] == address(0),'Kigzag: DAO exist');
         ICreatorDAO_LT(dao).initialise(_creator, votingDuration,  _token);
         creatorDAO[_creator] = dao;
         ICreatorToken_LT(_token).initialize(dao);
@@ -157,8 +157,8 @@ contract XeldoradoCreatorFactory_LT is IXeldoradoCreatorFactory_LT{
     }
 
     function _initialiseVault(address _vault, address _creator, string memory _name, string memory _symbol, address _token) internal {
-        require(creatorVault[_creator] == address(0),'Xeldorado: Vault exist');
-        IXeldoradoVault_LT(_vault).initialise(_creator, _name, _symbol, _token);
+        require(creatorVault[_creator] == address(0),'Kigzag: Vault exist');
+        ICreatorVault_LT(_vault).initialise(_creator, _name, _symbol, _token);
         creatorVault[_creator] = _vault;
         emit CreatorVaultCreated(_vault,_creator);
     }

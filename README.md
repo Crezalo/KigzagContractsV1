@@ -1,8 +1,8 @@
-# [Xeldorado Protocol](https://main.xeldorado.live/)
+# [Kigzag Protocol](https://main.Kigzag.live/)
 
 ![Samrt Contract Flow Diagram](./Images/social_token_development1.png)
 
-### Xeldorado - A general purpose Social Token Protocol to build Creator Economy using 2 types of tokens:
+### Kigzag - A general purpose Social Token Protocol to build Creator Economy using 2 types of tokens:
   
 #### 1. Loyalty Tokens (Launching soon)
   These are **non-tradable** fixed price tickets to get exclusive services/products from creator. 
@@ -159,8 +159,8 @@ We further plan to expand to EVM non-compatible networks depending on user deman
 
 - [x] <b>Migration to V2</b> 
   - [x] Pair, DAO, Vault and Bank contracts contains Token and NFT assets which is transfered via Migration Contract to V2 version of Pair, DAO, Vault and Bank contracts
-  - [x] Before migration of a Creator Community's assets, community members must vote for or against mirgration and migration contract will be made public much in advance. Voting is implemented in CreatorToken contract. This is done to ensure security of assets and decentralisation of decision making. This is important since in Xeldorado Protocol liquidity isn't rented its owned.
-  - [x] If voted no, then assets will stay in V1, current version, of Xeldorado Protocol
+  - [x] Before migration of a Creator Community's assets, community members must vote for or against mirgration and migration contract will be made public much in advance. Voting is implemented in CreatorToken contract. This is done to ensure security of assets and decentralisation of decision making. This is important since in Kigzag Protocol liquidity isn't rented its owned.
+  - [x] If voted no, then assets will stay in V1, current version, of Kigzag Protocol
   - [x] There can be 2 types of migration, partial and complete. In partial migration only one or two parts maybe updated like only Vault contract updated and hence needs asset transfer only for Vault's V2 version. In full migration all 4 contracts will be updated and maybe entire Factory and CreatorFactory may also be updated. 
   - [x] Migration function in Pair, DAO, Vault and Bank are implemented with check on voting status passed and only after that migration contract, that has been voted, is allowed to transfer asset by deploying V2 version of the contract.
   - [x] Migration function also updates all dependent contracts with new address of V2 contract. For e.g. if Vault contract gets migrated to V2,then its dependent contract CreatorToken, CreatorNFT, CreatorDAO and CreatorFactory will get updated with V2 address of vault variable.
@@ -178,7 +178,7 @@ We further plan to expand to EVM non-compatible networks depending on user deman
 
 ## Documentation
 
-White paper & Docs for Xeldorado Protocol is currently under development.
+White paper & Docs for Kigzag Protocol is currently under development.
 
 ## Tests
 
@@ -186,7 +186,7 @@ For tests please refer to [`README`](./test/README.md) from test folder.
 
 ## Licensing
 
-The primary license for Xeldorado Contracts V1 is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE). 
+The primary license for Kigzag Contracts V1 is the Business Source License 1.1 (`BUSL-1.1`), see [`LICENSE`](./LICENSE). 
 
 <h3>
     
@@ -204,20 +204,20 @@ The primary license for Xeldorado Contracts V1 is the Business Source License 1.
 
 ## Community
 
-<a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://main.xeldorado.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://t.me/xeldorado" target="_blank"><img src="https://main.xeldorado.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://twitter.com/XeldoradoLabs" target="_blank"><img src="https://main.xeldorado.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
-<a href="https://www.reddit.com/r/Xeldorado_/" target="_blank"><img src="https://main.xeldorado.live/images/reddit.png" width="80" height="80"/></a>
+<a href="https://discord.gg/ExMb82zpnB" target="_blank"><img src="https://main.Kigzag.live/images/discord.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://t.me/Kigzag" target="_blank"><img src="https://main.Kigzag.live/images/telegram.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://twitter.com/KigzagLabs" target="_blank"><img src="https://main.Kigzag.live/images/twitter.png" width="80" height="80"/></a>&emsp;&emsp;&emsp;
+<a href="https://www.reddit.com/r/Kigzag_/" target="_blank"><img src="https://main.Kigzag.live/images/reddit.png" width="80" height="80"/></a>
 
 ## Responsible disclosure
 
-At Xeldorado, we consider the security of our systems a top priority. But even putting top priority status and maximum effort, there is still possibility that vulnerabilities can exist. 
+At Kigzag, we consider the security of our systems a top priority. But even putting top priority status and maximum effort, there is still possibility that vulnerabilities can exist. 
 
 In case you discover a vulnerability, we would like to know about it immediately so we can take steps to address it as quickly as possible.  
 
 If you discover a vulnerability, please do the following: 
 
-    E-mail your findings to xeldorado.nft@gmail.com; 
+    E-mail your findings to Kigzag.nft@gmail.com; 
 
     Do not take advantage of the vulnerability or problem you have discovered; 
 
